@@ -19,7 +19,8 @@ services:
       #          simulated      — generate synthetic CSI data (no hardware required)
       - CSI_SOURCE=${CSI_SOURCE:-auto}
     # command is passed as arguments to ENTRYPOINT (/bin/sh -c), so $CSI_SOURCE is expanded by the shell.
-    command: ["/app/sensing-server --source ${CSI_SOURCE:-auto} --tick-ms 100 --ui-path /app/ui --http-port 3000 --ws-port 3001"]
+    command: >
+      /bin/sh -c "/app/sensing-server --source ${CSI_SOURCE:-auto} --tick-ms 100 --ui-path /app/ui --http-port 3000 --ws-port 3001"
 
   python-sensing:
     build:

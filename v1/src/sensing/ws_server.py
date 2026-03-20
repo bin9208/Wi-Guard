@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 # Configuration
 # ---------------------------------------------------------------------------
 
-HOST = "localhost"
+HOST = "0.0.0.0"
 PORT = 8765
 TICK_INTERVAL = 0.5  # seconds between broadcasts
 SIGNAL_FIELD_GRID = 20  # NxN grid for signal field visualization
@@ -91,8 +91,9 @@ class Esp32UdpCollector:
         self._thread: Optional[threading.Thread] = None
         self._sock: Optional[socket.socket] = None
 
-        # Last CSI frame for enhanced UI
-        self.last_csi: Optional[Dict] = None
+        # Last CSI frame per node for enhanced UI (keyed by node_id)
+        self.node_csi: Dict[int, Dict] = {}
+        self.last_csi: Optional[Dict] = None  # most recent frame (any node)
         self._frames_received = 0
 
     @property
@@ -171,8 +172,8 @@ class Esp32UdpCollector:
         else:
             mean_amp = 0.0
 
-        # Store enhanced CSI info for UI
-        self.last_csi = {
+        # Store enhanced CSI info for UI (per node)
+        csi_info = {
             "node_id": node_id,
             "n_antennas": n_ant,
             "n_subcarriers": n_sc,
@@ -183,7 +184,10 @@ class Esp32UdpCollector:
             "mean_amplitude": mean_amp,
             "amplitude": amplitude_list[:56],  # cap for JSON size
             "source_addr": f"{addr[0]}:{addr[1]}",
+            "last_seen": time.time(),
         }
+        self.node_csi[node_id] = csi_info
+        self.last_csi = csi_info
 
         # Use RSSI from the ESP32 frame header as the primary signal metric.
         # If RSSI is the default -80 placeholder, derive a pseudo-RSSI from
@@ -343,39 +347,62 @@ class SensingWebSocketServer:
         self.source = source_map.get(type(collector).__name__, "unknown")
         return collector
 
+    # Default positions for 6 ESP32-S3 nodes (arranged in a room)
+    NODE_POSITIONS = {
+        0: [0.0, 0.0, 1.5],   # node 0 — front-left
+        1: [3.0, 0.0, 1.5],   # node 1 — front-right
+        2: [0.0, 3.0, 1.5],   # node 2 — back-left
+        3: [3.0, 3.0, 1.5],   # node 3 — back-right
+        4: [1.5, 0.0, 2.5],   # node 4 — front-center (high)
+        5: [1.5, 3.0, 2.5],   # node 5 — back-center (high)
+    }
+
     def _build_message(self, features: RssiFeatures, result: SensingResult) -> str:
         """Build the JSON message to broadcast."""
         # Get CSI-specific data if available
         csi_data = None
+        all_nodes_csi = {}
         if isinstance(self.collector, Esp32UdpCollector):
             csi_data = self.collector.last_csi
+            all_nodes_csi = self.collector.node_csi
 
         signal_field = generate_signal_field(features, result, csi_data=csi_data)
 
-        node_info = {
-            "node_id": 1,
-            "rssi_dbm": features.mean,
-            "position": [2.0, 0.0, 1.5],
-            "amplitude": [],
-            "subcarrier_count": 0,
-        }
-
-        # Enrich with real CSI data
-        if csi_data:
-            node_info["node_id"] = csi_data.get("node_id", 1)
-            node_info["rssi_dbm"] = csi_data.get("rssi_dbm", features.mean)
-            node_info["amplitude"] = csi_data.get("amplitude", [])
-            node_info["subcarrier_count"] = csi_data.get("n_subcarriers", 0)
-            node_info["mean_amplitude"] = csi_data.get("mean_amplitude", 0)
-            node_info["freq_mhz"] = csi_data.get("freq_mhz", 0)
-            node_info["sequence"] = csi_data.get("sequence", 0)
-            node_info["source_addr"] = csi_data.get("source_addr", "")
+        # Build nodes array — includes all known ESP32 nodes
+        nodes = []
+        if all_nodes_csi:
+            for nid, ndata in sorted(all_nodes_csi.items()):
+                pos = self.NODE_POSITIONS.get(nid, [1.5, 1.5, 1.5])
+                nodes.append({
+                    "node_id": ndata.get("node_id", nid),
+                    "rssi_dbm": ndata.get("rssi_dbm", features.mean),
+                    "position": pos,
+                    "amplitude": ndata.get("amplitude", []),
+                    "subcarrier_count": ndata.get("n_subcarriers", 0),
+                    "mean_amplitude": ndata.get("mean_amplitude", 0),
+                    "freq_mhz": ndata.get("freq_mhz", 0),
+                    "sequence": ndata.get("sequence", 0),
+                    "source_addr": ndata.get("source_addr", ""),
+                    "last_seen": ndata.get("last_seen", 0),
+                    "online": (time.time() - ndata.get("last_seen", 0)) < 10,
+                })
+        else:
+            # Fallback single-node for non-ESP32 sources
+            nodes.append({
+                "node_id": 1,
+                "rssi_dbm": features.mean,
+                "position": [2.0, 0.0, 1.5],
+                "amplitude": [],
+                "subcarrier_count": 0,
+                "online": True,
+            })
 
         msg = {
             "type": "sensing_update",
             "timestamp": time.time(),
             "source": self.source,
-            "nodes": [node_info],
+            "node_count": len(nodes),
+            "nodes": nodes,
             "features": {
                 "mean_rssi": features.mean,
                 "variance": features.variance,
