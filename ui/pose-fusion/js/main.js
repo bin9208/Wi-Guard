@@ -99,7 +99,7 @@ function init() {
   // Pause
   pauseBtn.addEventListener('click', () => {
     isPaused = !isPaused;
-    pauseBtn.textContent = isPaused ? '▶ Resume' : '⏸ Pause';
+    pauseBtn.textContent = isPaused ? '▶ 계속 (Resume)' : '⏸ 일시정지 (Pause)';
     pauseBtn.classList.toggle('active', isPaused);
   });
 
@@ -113,9 +113,9 @@ function init() {
   connectWsBtn.addEventListener('click', async () => {
     const url = wsUrlInput.value.trim();
     if (!url) return;
-    connectWsBtn.textContent = 'Connecting...';
+    connectWsBtn.textContent = '연결 중...';
     const ok = await csiSimulator.connectLive(url);
-    connectWsBtn.textContent = ok ? '✓ Connected' : 'Connect';
+    connectWsBtn.textContent = ok ? '✓ 연결됨' : '연결';
     if (ok) {
       connectWsBtn.classList.add('active');
     }
@@ -141,12 +141,15 @@ function init() {
   if (wsUrlInput) wsUrlInput.value = defaultWsUrl;
   csiSimulator.connectLive(defaultWsUrl).then(ok => {
     if (ok && connectWsBtn) {
-      connectWsBtn.textContent = '✓ Live ESP32';
+      connectWsBtn.textContent = '✓ 라이브 감지중';
       connectWsBtn.classList.add('active');
-      statusLabel.textContent = 'LIVE CSI';
+      statusLabel.textContent = '라이브 CSI';
       statusDot.classList.remove('offline');
     }
   });
+
+  // Fetch and setup models
+  setupModelUI();
 
   // Auto-start camera for video/dual modes
   updateModeUI();
@@ -160,11 +163,11 @@ async function startCamera() {
   const ok = await videoCapture.start();
   if (ok) {
     statusDot.classList.remove('offline');
-    statusLabel.textContent = 'LIVE';
+    statusLabel.textContent = '라이브';
     resizeCanvases();
   } else {
     cameraPrompt.style.display = 'flex';
-    cameraPrompt.querySelector('p').textContent = 'Camera access denied. Try CSI-only mode.';
+    cameraPrompt.querySelector('p').textContent = '카메라 접근이 거부되었습니다. CSI 전용 모드를 시도하세요.';
   }
 }
 
@@ -179,7 +182,7 @@ function updateModeUI() {
   }
 
   // Update mode label in both the overlay and the camera prompt
-  const labelMap = { dual: 'DUAL FUSION', video: 'VIDEO ONLY', csi: 'CSI ONLY' };
+  const labelMap = { dual: '듀얼 퓨전 (DUAL FUSION)', video: '비디오 전용 (VIDEO ONLY)', csi: 'CSI 전용 (CSI ONLY)' };
   const modeLabel = document.getElementById('mode-label');
   const promptLabel = document.getElementById('prompt-mode-label');
   if (modeLabel) modeLabel.textContent = labelMap[mode] || mode;
@@ -295,7 +298,7 @@ function mainLoop(timestamp) {
   const keypoints = poseDecoder.decode(fusedEmb, motionRegion, elapsed, csiState);
 
   // --- Render Skeleton ---
-  const labelMap = { dual: 'DUAL FUSION', video: 'VIDEO ONLY', csi: 'CSI ONLY' };
+  const labelMap = { dual: '듀얼 퓨전 (DUAL FUSION)', video: '비디오 전용 (VIDEO ONLY)', csi: 'CSI 전용 (CSI ONLY)' };
   renderer.drawSkeleton(skeletonCtx, keypoints, skeletonCanvas.width, skeletonCanvas.height, {
     minConfidence: confidenceThreshold,
     color: mode === 'csi' ? 'amber' : 'green',
@@ -466,6 +469,79 @@ function drawRssiSparkline() {
   ctx.strokeStyle = `rgba(0,216,120,${0.3 + pulse * 0.3})`;
   ctx.lineWidth = 1;
   ctx.stroke();
+}
+
+// === Model Setup ===
+function setupModelUI() {
+  const select = document.getElementById('model-select');
+  const loadBtn = document.getElementById('load-model-btn');
+  const unloadBtn = document.getElementById('unload-model-btn');
+  const statusEl = document.getElementById('active-model-status');
+
+  if (!select) return;
+
+  // Fetch models
+  fetch('/api/v1/models')
+    .then(r => r.json())
+    .then(data => {
+      select.innerHTML = '';
+      const models = data.models || [];
+      if (models.length === 0) {
+        select.innerHTML = '<option value="">모델 없음</option>';
+        return;
+      }
+      models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        let niceName = m.id;
+        if (m.id.includes('universal-studio')) niceName = '원룸용 범용 CSI 모델';
+        if (m.id.includes('universal-house')) niceName = '일반 주택용 범용 CSI 모델';
+        opt.textContent = `${niceName} (${(m.size_bytes / 1024 / 1024).toFixed(1)}MB)`;
+        select.appendChild(opt);
+      });
+    })
+    .catch(e => {
+      console.error('Failed to fetch models', e);
+      select.innerHTML = '<option value="">모델 목록 불러오기 실패</option>';
+    });
+
+  if (loadBtn) {
+    loadBtn.addEventListener('click', async () => {
+      const modelId = select.value;
+      if (!modelId) return;
+      
+      const prevText = loadBtn.textContent;
+      loadBtn.textContent = '적용 중...';
+      try {
+        const res = await fetch(`/api/v1/models/${modelId}/load`, { method: 'POST' });
+        if (res.ok) {
+          statusEl.innerHTML = `현재 적용된 모델: <b style="color:var(--green-glow)">${modelId}</b>`;
+        } else {
+          alert('모델 적용에 실패했습니다.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('모델 서버 연결 오류');
+      }
+      loadBtn.textContent = prevText;
+    });
+  }
+
+  if (unloadBtn) {
+    unloadBtn.addEventListener('click', async () => {
+      const prevText = unloadBtn.textContent;
+      unloadBtn.textContent = '처리 중...';
+      try {
+        const res = await fetch(`/api/v1/models/unload`, { method: 'POST' });
+        if (res.ok) {
+          statusEl.innerHTML = `현재 적용된 모델: <b>없음</b>`;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+      unloadBtn.textContent = prevText;
+    });
+  }
 }
 
 // Boot

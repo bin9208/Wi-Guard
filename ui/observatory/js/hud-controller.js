@@ -13,9 +13,9 @@
 // ---- Constants ----
 
 export const SCENARIO_NAMES = [
-  'EMPTY ROOM','VITAL SIGNS','MULTI-PERSON','FALL DETECT',
-  'SLEEP MONITOR','INTRUSION','GESTURE CTRL','CROWD OCCUPANCY',
-  'SEARCH RESCUE','ELDERLY CARE','FITNESS','SECURITY PATROL',
+  '빈 방(대기중)','바이탈 사인','다중 인원','낙상 감지',
+  '수면 모니터링','침입 감지','제스처 컨트롤','군중 밀집도',
+  '수색 및 구조','독거노인 케어','피트니스','보안 패트롤',
 ];
 
 export const DEFAULTS = {
@@ -66,19 +66,19 @@ export const PRESETS = {
 
 // Scenario descriptions shown below the dropdown
 const SCENARIO_DESCRIPTIONS = {
-  auto:              'Auto-cycling through all sensing scenarios.',
-  empty_room:        'Baseline calibration with no human presence in the monitored zone.',
-  single_breathing:  'Detecting vital signs through WiFi signal micro-variations.',
-  two_walking:       'Tracking multiple people simultaneously via CSI multiplex separation.',
-  fall_event:        'Sudden posture-change detection using acceleration feature analysis.',
-  sleep_monitoring:  'Monitoring breathing patterns and apnea events during sleep.',
-  intrusion_detect:  'Passive perimeter monitoring -- no cameras, pure RF sensing.',
-  gesture_control:   'DTW-based gesture recognition from hand/arm motion signatures.',
-  crowd_occupancy:   'Estimating room occupancy count from aggregate CSI variance.',
-  search_rescue:     'Through-wall survivor detection using WiFi-MAT multistatic mode.',
-  elderly_care:      'Continuous gait analysis for early mobility-decline detection.',
-  fitness_tracking:  'Rep counting and exercise classification from body kinematics.',
-  security_patrol:   'Multi-zone presence patrol with camera-free motion heatmaps.',
+  auto:              '모든 센싱 시나리오를 자동으로 순환하며 보여줍니다.',
+  empty_room:        '감지 구역 내 인원 부재 상태. 시스템 보정(캘리브레이션) 기준.',
+  single_breathing:  'WiFi 신호의 미세 변화를 통해 호흡수와 심박수를 원격 측정합니다.',
+  two_walking:       '다중 TDM 슬롯을 활용해 여러 사람의 움직임 궤적을 동시 추적합니다.',
+  fall_event:        '가속도 특징 분석 알고리즘을 사용해 급격한 자세 변화 및 낙상을 감지합니다.',
+  sleep_monitoring:  '수면 중 호흡 패턴 변화를 감지하고 무호흡증 등 이상 징후를 추적합니다.',
+  intrusion_detect:  '카메라 없이 순수 RF 전파 신호의 변화만으로 무단 침입을 수동 감지합니다.',
+  gesture_control:   '팔/손의 움직임 시그니처를 DTW 매칭하여 사전 정의된 제스처를 인식합니다.',
+  crowd_occupancy:   '실내 전체 CSI 분산(Variance) 합산 모델로 총 재실 인원을 추정합니다.',
+  search_rescue:     'WiFi-MAT (다중 정적 반사) 모드를 활용하여 장애물/벽 투과 생존자 탐색.',
+  elderly_care:      '보행 패턴(Gait)을 상시 모니터링하여 이동성 저하를 조기 발견합니다.',
+  fitness_tracking:  '신체 운동역학 빅데이터를 활용하여 반복 횟수 카운팅 및 운동 종류 분류.',
+  security_patrol:   '사각지대 없는 전파 히트맵을 통해 복수 구역 대상 다차원 경계 침투를 감시합니다.',
 };
 
 // Edge modules active per scenario

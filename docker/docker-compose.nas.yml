@@ -1,0 +1,43 @@
+# ============================================
+# RuView NAS 배포 — Docker Compose
+# NAS에서 이 파일만 있으면 바로 실행 가능
+# by bin9208
+# ============================================
+#
+# 사용법 (NAS에서):
+#   1. 이 파일을 NAS에 복사
+#   2. docker-compose -f docker-compose.nas.yml up -d
+#   3. 브라우저에서 http://나스IP:8080 접속
+#
+# Container Manager (Synology) 사용 시:
+#   프로젝트 생성 → 이 파일 업로드 → 실행
+
+version: "3.9"
+
+services:
+  ruview:
+    image: bin920832/ruview-nas:latest
+    container_name: ruview
+    restart: unless-stopped
+    ports:
+      - "8080:8080"       # Web UI (nginx)
+      - "3000:3000"       # Rust HTTP API
+      - "3001:3001"       # Rust WebSocket
+      - "5005:5005/udp"   # ESP32 CSI 데이터
+    environment:
+      - RUST_LOG=info
+      # CSI 데이터 소스 설정
+      # esp32 = ESP32 UDP만 사용 (실제 감지)
+      - CSI_SOURCE=${CSI_SOURCE:-esp32}
+    # NAS 리소스 제한 (Rust라서 가벼움)
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

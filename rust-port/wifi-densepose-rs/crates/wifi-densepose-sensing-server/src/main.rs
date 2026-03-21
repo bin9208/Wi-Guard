@@ -278,6 +278,7 @@ struct BoundingBox {
 /// Shared application state
 struct AppStateInner {
     latest_update: Option<SensingUpdate>,
+    active_nodes: std::collections::HashMap<u8, NodeInfo>,
     rssi_history: VecDeque<f64>,
     /// Circular buffer of recent CSI amplitude vectors for temporal analysis.
     /// Each entry is the full subcarrier amplitude vector for one frame.
@@ -2833,18 +2834,23 @@ async fn udp_receiver_task(state: SharedState, udp_port: u16) {
                         0
                     };
 
+                    s.active_nodes.insert(frame.node_id, NodeInfo {
+                        node_id: frame.node_id,
+                        rssi_dbm: features.mean_rssi,
+                        position: [2.0, 0.0, 1.5],
+                        amplitude: frame.amplitudes.iter().take(56).cloned().collect(),
+                        subcarrier_count: frame.n_subcarriers as usize,
+                    });
+                    
+                    let mut current_nodes: Vec<NodeInfo> = s.active_nodes.values().cloned().collect();
+                    current_nodes.sort_by_key(|n| n.node_id);
+
                     let mut update = SensingUpdate {
                         msg_type: "sensing_update".to_string(),
                         timestamp: chrono::Utc::now().timestamp_millis() as f64 / 1000.0,
                         source: "esp32".to_string(),
                         tick,
-                        nodes: vec![NodeInfo {
-                            node_id: frame.node_id,
-                            rssi_dbm: features.mean_rssi,
-                            position: [2.0, 0.0, 1.5],
-                            amplitude: frame.amplitudes.iter().take(56).cloned().collect(),
-                            subcarrier_count: frame.n_subcarriers as usize,
-                        }],
+                        nodes: current_nodes,
                         features: features.clone(),
                         classification,
                         signal_field: generate_signal_field(
@@ -3562,6 +3568,7 @@ async fn main() {
     let (tx, _) = broadcast::channel::<String>(256);
     let state: SharedState = Arc::new(RwLock::new(AppStateInner {
         latest_update: None,
+        active_nodes: std::collections::HashMap::new(),
         rssi_history: VecDeque::new(),
         frame_history: VecDeque::new(),
         tick: 0,
