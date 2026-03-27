@@ -176,8 +176,9 @@
         setLoadingProgress(85, 'Connecting to server...');
 
         // 8. WebSocket client
+        const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         state.wsClient = new WebSocketClient({
-          url: 'ws://localhost:8000/ws/pose',
+          url: `${proto}//${window.location.host}/ws/pose`,
           onMessage: (msg) => handleWebSocketMessage(msg),
           onStateChange: (newState, oldState) => handleConnectionStateChange(newState, oldState),
           onError: (err) => console.error('[VIZ] WebSocket error:', err)

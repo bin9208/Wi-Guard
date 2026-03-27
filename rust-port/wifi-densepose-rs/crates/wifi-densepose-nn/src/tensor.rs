@@ -1,7 +1,7 @@
 //! Tensor types and operations for neural network inference.
 //!
 //! This module provides a unified tensor abstraction that works across
-//! different backends (ONNX, tch, Candle).
+//! different backends (ONNX, torch, Candle).
 
 use crate::error::{NnError, NnResult};
 use ndarray::{Array1, Array2, Array3, Array4, ArrayD};

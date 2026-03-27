@@ -448,14 +448,14 @@ class Observatory {
 
     const tryNext = (i) => {
       if (i >= unique.length) {
-        console.log('[Observatory] No sensing server detected, using demo mode');
+        console.log('[Observatory] No sensing server detected, waiting for live connection');
         return;
       }
       const base = unique[i];
       fetch(`${base}/health`, { signal: AbortSignal.timeout(1500) })
         .then(r => r.ok ? r.json() : Promise.reject())
         .then(data => {
-          if (data && data.status === 'ok') {
+          if (data && (data.status === 'ok' || data.status === 'healthy')) {
             const wsProto = base.startsWith('https') ? 'wss:' : 'ws:';
             const urlObj = new URL(base);
             const wsUrl = `${wsProto}//${urlObj.host}/ws/sensing`;
@@ -482,10 +482,10 @@ class Observatory {
       };
       this._ws.onmessage = (evt) => { try { this._liveData = JSON.parse(evt.data); } catch {} };
       this._ws.onclose = () => {
-        console.log('[Observatory] WebSocket closed, falling back to demo');
+        console.log('[Observatory] WebSocket closed, waiting for live connection');
         this._ws = null;
-        this.settings.dataSource = 'demo';
-        this._hud.updateSourceBadge('demo', null);
+        this.settings.dataSource = 'disconnected';
+        this._hud.updateSourceBadge('offline', null);
       };
       this._ws.onerror = () => {};
     } catch {}
@@ -509,7 +509,11 @@ class Observatory {
     if (this.settings.dataSource === 'ws' && this._liveData) {
       this._currentData = this._liveData;
     } else {
-      this._currentData = this._demoData.update(dt);
+      this._currentData = {
+        persons: [],
+        vitals: { hr: 0, br: 0, conf: 0 },
+        signal: { rssi: -100, var: 0, motion: 0 }
+      };
     }
     const data = this._currentData;
 

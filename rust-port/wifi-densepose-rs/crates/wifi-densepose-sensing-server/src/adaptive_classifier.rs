@@ -348,7 +348,7 @@ pub fn train_from_recordings(recordings_dir: &Path) -> Result<AdaptiveModel, Str
         }
 
         let mut epoch_loss = 0.0f64;
-        let mut batch_count = 0;
+        let mut _batch_count = 0;
 
         for batch_start in (0..norm_samples.len()).step_by(batch_size) {
             let batch_end = (batch_start + batch_size).min(norm_samples.len());
@@ -394,7 +394,7 @@ pub fn train_from_recordings(recordings_dir: &Path) -> Result<AdaptiveModel, Str
                     weights[c][i] -= current_lr * grad[c][i] / bs;
                 }
             }
-            batch_count += 1;
+            _batch_count += 1;
         }
 
         if epoch % 50 == 0 || epoch == epochs - 1 {

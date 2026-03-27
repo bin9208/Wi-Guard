@@ -1,14 +1,14 @@
 //! Integration tests for [`wifi_densepose_train::losses`].
 //!
-//! All tests are gated behind `#[cfg(feature = "tch-backend")]` because the
-//! loss functions require PyTorch via `tch`.  When running without that
+//! All tests are gated behind `#[cfg(feature = "torch-backend")]` because the
+//! loss functions require PyTorch via `torch`.  When running without that
 //! feature the entire module is compiled but skipped at test-registration
 //! time.
 //!
 //! All input tensors are constructed from fixed, deterministic data — no
 //! `rand` crate, no OS entropy.
 
-#[cfg(feature = "tch-backend")]
+#[cfg(feature = "torch-backend")]
 mod tch_tests {
     use wifi_densepose_train::losses::{
         generate_gaussian_heatmap, generate_target_heatmaps, LossWeights, WiFiDensePoseLoss,
@@ -18,8 +18,8 @@ mod tch_tests {
     // Helper: CPU device
     // -----------------------------------------------------------------------
 
-    fn cpu() -> tch::Device {
-        tch::Device::Cpu
+    fn cpu() -> torch::Device {
+        torch::Device::Cpu
     }
 
     // -----------------------------------------------------------------------
@@ -193,9 +193,9 @@ mod tch_tests {
         let loss_fn = WiFiDensePoseLoss::new(LossWeights::default());
         let dev = cpu();
 
-        let pred = tch::Tensor::ones([2, 17, 16, 16], (tch::Kind::Float, dev));
-        let target = tch::Tensor::ones([2, 17, 16, 16], (tch::Kind::Float, dev));
-        let vis = tch::Tensor::ones([2, 17], (tch::Kind::Float, dev));
+        let pred = torch::Tensor::ones([2, 17, 16, 16], (torch::Kind::Float, dev));
+        let target = torch::Tensor::ones([2, 17, 16, 16], (torch::Kind::Float, dev));
+        let vis = torch::Tensor::ones([2, 17], (torch::Kind::Float, dev));
 
         let loss = loss_fn.keypoint_loss(&pred, &target, &vis);
         let val = loss.double_value(&[]) as f32;
@@ -212,9 +212,9 @@ mod tch_tests {
         let loss_fn = WiFiDensePoseLoss::new(LossWeights::default());
         let dev = cpu();
 
-        let pred = tch::Tensor::zeros([1, 17, 8, 8], (tch::Kind::Float, dev));
-        let target = tch::Tensor::ones([1, 17, 8, 8], (tch::Kind::Float, dev));
-        let vis = tch::Tensor::ones([1, 17], (tch::Kind::Float, dev));
+        let pred = torch::Tensor::zeros([1, 17, 8, 8], (torch::Kind::Float, dev));
+        let target = torch::Tensor::ones([1, 17, 8, 8], (torch::Kind::Float, dev));
+        let vis = torch::Tensor::ones([1, 17], (torch::Kind::Float, dev));
 
         let loss = loss_fn.keypoint_loss(&pred, &target, &vis);
         let val = loss.double_value(&[]) as f32;
@@ -232,9 +232,9 @@ mod tch_tests {
         let dev = cpu();
 
         // Large error but all visibility = 0 → loss must be ≈ 0.
-        let pred = tch::Tensor::ones([1, 17, 8, 8], (tch::Kind::Float, dev));
-        let target = tch::Tensor::zeros([1, 17, 8, 8], (tch::Kind::Float, dev));
-        let vis = tch::Tensor::zeros([1, 17], (tch::Kind::Float, dev));
+        let pred = torch::Tensor::ones([1, 17, 8, 8], (torch::Kind::Float, dev));
+        let target = torch::Tensor::zeros([1, 17, 8, 8], (torch::Kind::Float, dev));
+        let vis = torch::Tensor::zeros([1, 17], (torch::Kind::Float, dev));
 
         let loss = loss_fn.keypoint_loss(&pred, &target, &vis);
         let val = loss.double_value(&[]) as f32;
@@ -259,9 +259,9 @@ mod tch_tests {
         let h = 8_i64;
         let w = 8_i64;
 
-        let pred_parts = tch::Tensor::zeros([b, 25, h, w], (tch::Kind::Float, dev));
-        let target_parts = tch::Tensor::ones([b, h, w], (tch::Kind::Int64, dev));
-        let uv = tch::Tensor::zeros([b, 48, h, w], (tch::Kind::Float, dev));
+        let pred_parts = torch::Tensor::zeros([b, 25, h, w], (torch::Kind::Float, dev));
+        let target_parts = torch::Tensor::ones([b, h, w], (torch::Kind::Int64, dev));
+        let uv = torch::Tensor::zeros([b, 48, h, w], (torch::Kind::Float, dev));
 
         let loss = loss_fn.densepose_loss(&pred_parts, &target_parts, &uv, &uv);
         let val = loss.double_value(&[]) as f32;
@@ -288,9 +288,9 @@ mod tch_tests {
         let dev = cpu();
 
         // pred = zeros, target = ones → non-zero keypoint error.
-        let pred_kp = tch::Tensor::zeros([2, 17, 8, 8], (tch::Kind::Float, dev));
-        let target_kp = tch::Tensor::ones([2, 17, 8, 8], (tch::Kind::Float, dev));
-        let vis = tch::Tensor::ones([2, 17], (tch::Kind::Float, dev));
+        let pred_kp = torch::Tensor::zeros([2, 17, 8, 8], (torch::Kind::Float, dev));
+        let target_kp = torch::Tensor::ones([2, 17, 8, 8], (torch::Kind::Float, dev));
+        let vis = torch::Tensor::ones([2, 17], (torch::Kind::Float, dev));
 
         let (_, output) = loss_fn.forward(
             &pred_kp, &target_kp, &vis,
@@ -316,8 +316,8 @@ mod tch_tests {
         let loss_fn = WiFiDensePoseLoss::new(weights);
         let dev = cpu();
 
-        let perfect = tch::Tensor::ones([1, 17, 8, 8], (tch::Kind::Float, dev));
-        let vis = tch::Tensor::ones([1, 17], (tch::Kind::Float, dev));
+        let perfect = torch::Tensor::ones([1, 17, 8, 8], (torch::Kind::Float, dev));
+        let vis = torch::Tensor::ones([1, 17], (torch::Kind::Float, dev));
 
         let (_, output) = loss_fn.forward(
             &perfect, &perfect, &vis,
@@ -338,8 +338,8 @@ mod tch_tests {
         let loss_fn = WiFiDensePoseLoss::new(LossWeights::default());
         let dev = cpu();
 
-        let t = tch::Tensor::ones([1, 17, 8, 8], (tch::Kind::Float, dev));
-        let vis = tch::Tensor::ones([1, 17], (tch::Kind::Float, dev));
+        let t = torch::Tensor::ones([1, 17, 8, 8], (torch::Kind::Float, dev));
+        let vis = torch::Tensor::ones([1, 17], (torch::Kind::Float, dev));
 
         let (_, output) = loss_fn.forward(
             &t, &t, &vis,
@@ -363,16 +363,16 @@ mod tch_tests {
         let loss_fn = WiFiDensePoseLoss::new(LossWeights::default());
         let dev = cpu();
 
-        let pred_kp = tch::Tensor::zeros([1, 17, 8, 8], (tch::Kind::Float, dev));
-        let target_kp = tch::Tensor::ones([1, 17, 8, 8], (tch::Kind::Float, dev));
-        let vis = tch::Tensor::ones([1, 17], (tch::Kind::Float, dev));
+        let pred_kp = torch::Tensor::zeros([1, 17, 8, 8], (torch::Kind::Float, dev));
+        let target_kp = torch::Tensor::ones([1, 17, 8, 8], (torch::Kind::Float, dev));
+        let vis = torch::Tensor::ones([1, 17], (torch::Kind::Float, dev));
 
-        let pred_parts = tch::Tensor::zeros([1, 25, 8, 8], (tch::Kind::Float, dev));
-        let target_parts = tch::Tensor::ones([1, 8, 8], (tch::Kind::Int64, dev));
-        let uv = tch::Tensor::zeros([1, 48, 8, 8], (tch::Kind::Float, dev));
+        let pred_parts = torch::Tensor::zeros([1, 25, 8, 8], (torch::Kind::Float, dev));
+        let target_parts = torch::Tensor::ones([1, 8, 8], (torch::Kind::Int64, dev));
+        let uv = torch::Tensor::zeros([1, 48, 8, 8], (torch::Kind::Float, dev));
 
-        let student = tch::Tensor::zeros([1, 64, 4, 4], (tch::Kind::Float, dev));
-        let teacher = tch::Tensor::ones([1, 64, 4, 4], (tch::Kind::Float, dev));
+        let student = torch::Tensor::zeros([1, 64, 4, 4], (torch::Kind::Float, dev));
+        let teacher = torch::Tensor::ones([1, 64, 4, 4], (torch::Kind::Float, dev));
 
         let (_, output) = loss_fn.forward(
             &pred_kp, &target_kp, &vis,
@@ -413,7 +413,7 @@ mod tch_tests {
         let loss_fn = WiFiDensePoseLoss::new(LossWeights::default());
         let dev = cpu();
 
-        let feat = tch::Tensor::ones([2, 64, 8, 8], (tch::Kind::Float, dev));
+        let feat = torch::Tensor::ones([2, 64, 8, 8], (torch::Kind::Float, dev));
         let loss = loss_fn.transfer_loss(&feat, &feat);
         let val = loss.double_value(&[]) as f32;
 
@@ -429,8 +429,8 @@ mod tch_tests {
         let loss_fn = WiFiDensePoseLoss::new(LossWeights::default());
         let dev = cpu();
 
-        let student = tch::Tensor::zeros([2, 64, 8, 8], (tch::Kind::Float, dev));
-        let teacher = tch::Tensor::ones([2, 64, 8, 8], (tch::Kind::Float, dev));
+        let student = torch::Tensor::zeros([2, 64, 8, 8], (torch::Kind::Float, dev));
+        let teacher = torch::Tensor::ones([2, 64, 8, 8], (torch::Kind::Float, dev));
 
         let loss = loss_fn.transfer_loss(&student, &teacher);
         let val = loss.double_value(&[]) as f32;
@@ -442,10 +442,10 @@ mod tch_tests {
     }
 }
 
-// When tch-backend is disabled, ensure the file still compiles cleanly.
-#[cfg(not(feature = "tch-backend"))]
+// When torch-backend is disabled, ensure the file still compiles cleanly.
+#[cfg(not(feature = "torch-backend"))]
 #[test]
 fn tch_backend_not_enabled() {
-    // This test passes trivially when the tch-backend feature is absent.
+    // This test passes trivially when the torch-backend feature is absent.
     // The tch_tests module above is fully skipped.
 }

@@ -38,7 +38,7 @@
 //! println!("amplitude shape: {:?}", sample.amplitude.shape());
 //! ```
 
-// Note: #![forbid(unsafe_code)] is intentionally absent because the `tch`
+// Note: #![forbid(unsafe_code)] is intentionally absent because the `torch`
 // dependency (PyTorch Rust bindings) internally requires unsafe code via FFI.
 // All *this* crate's code is written without unsafe blocks.
 #![warn(missing_docs)]
@@ -54,19 +54,19 @@ pub mod ruview_metrics;
 pub mod subcarrier;
 pub mod virtual_aug;
 
-// The following modules use `tch` (PyTorch Rust bindings) for GPU-accelerated
-// training and are only compiled when the `tch-backend` feature is enabled.
+// The following modules use `torch` (PyTorch Rust bindings) for GPU-accelerated
+// training and are only compiled when the `torch-backend` feature is enabled.
 // Without the feature the crate still provides the dataset / config / subcarrier
 // APIs needed for data preprocessing and proof verification.
-#[cfg(feature = "tch-backend")]
+#[cfg(feature = "torch-backend")]
 pub mod losses;
-#[cfg(feature = "tch-backend")]
+#[cfg(feature = "torch-backend")]
 pub mod metrics;
-#[cfg(feature = "tch-backend")]
+#[cfg(feature = "torch-backend")]
 pub mod model;
-#[cfg(feature = "tch-backend")]
+#[cfg(feature = "torch-backend")]
 pub mod proof;
-#[cfg(feature = "tch-backend")]
+#[cfg(feature = "torch-backend")]
 pub mod trainer;
 
 // Convenient re-exports at the crate root.
@@ -85,7 +85,8 @@ pub use domain::{
 pub use eval::CrossDomainEvaluator;
 pub use geometry::{FilmLayer, FourierPositionalEncoding, GeometryEncoder, MeridianGeometryConfig};
 pub use rapid_adapt::{AdaptError, AdaptationLoss, AdaptationResult, RapidAdaptation};
-pub use virtual_aug::VirtualDomainAugmentor;
+#[cfg(feature = "torch-backend")]
+pub use virtual_aug::{CsiAugmentor, VirtualDomainAugmentor};
 
 /// Crate version string.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

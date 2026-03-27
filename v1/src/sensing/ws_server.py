@@ -465,6 +465,14 @@ class SensingWebSocketServer:
                     message = self._build_message(features, result)
                     await self._broadcast(message)
 
+                    # Feed the REST API history buffer
+                    try:
+                        from v1.src.api.routers.sensing import push_sensing_snapshot
+                        import json as _json
+                        push_sensing_snapshot(_json.loads(message))
+                    except Exception:
+                        pass  # REST API router may not be loaded
+
                     # Print status every few ticks
                     if isinstance(self.collector, Esp32UdpCollector):
                         csi = self.collector.last_csi

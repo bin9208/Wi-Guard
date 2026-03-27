@@ -1,4 +1,4 @@
-//! End-to-end WiFi-DensePose model (tch-rs / LibTorch backend).
+//! End-to-end WiFi-DensePose model (torch-rs / LibTorch backend).
 //!
 //! Architecture (following CMU arXiv:2301.00250):
 //!
@@ -23,16 +23,17 @@
 //!
 //! # No pre-trained weights
 //!
-//! Weights are initialised from scratch (Kaiming uniform, default from tch).
+//! Weights are initialised from scratch (Kaiming uniform, default from torch).
 //! Pre-trained ImageNet weights are not loaded because network access is not
 //! guaranteed during training runs.
 
 use std::path::Path;
-use tch::{nn, nn::Module, nn::ModuleT, Device, Kind, Tensor};
+use torch::{nn, nn::Module, nn::ModuleT, Device, Kind, Tensor};
 
 use ruvector_attn_mincut::attn_mincut;
 use ruvector_attention::attention::ScaledDotProductAttention;
 use ruvector_attention::traits::Attention;
+use rayon::prelude::*;
 
 use crate::config::TrainingConfig;
 use crate::error::TrainError;
@@ -76,22 +77,24 @@ pub struct WiFiDensePoseModel {
 impl WiFiDensePoseModel {
     /// Build a new model with randomly-initialised weights on `device`.
     ///
-    /// Call `tch::manual_seed(seed)` before this for reproducibility.
+    /// Call `torch::manual_seed(seed)` before this for reproducibility.
     pub fn new(config: &TrainingConfig, device: Device) -> Self {
         let vs = nn::VarStore::new(device);
         let root = vs.root();
 
-        // Compute the flattened CSI input size used by the modality translator.
-        let n_ant = (config.window_frames
-            * config.num_antennas_tx
-            * config.num_antennas_rx) as i64;
-        let n_sc = config.num_subcarriers as i64;
-        let flat_csi = n_ant * n_sc;
+        // Separate antenna count from time × antenna product.
+        // n_ant = pure antenna paths (tx × rx), NOT multiplied by window_frames.
+        let ant = (config.num_antennas_tx * config.num_antennas_rx) as i64; // 1×3 = 3
+        let n_sc = config.num_subcarriers as i64; // 56
+        let flat_csi = (config.window_frames as i64) * ant * n_sc; // 100×3×56 = 16800
 
         let num_parts = config.num_body_parts as i64;
 
+        // Translator receives: flat_csi=16800, ant=3, n_sc=56
+        //   → T = 16800/(3×56) = 100, in_ch = 2×3 = 6
+        //   → Input image: [B, 6, 100, 56]  (proper 2D!)
         let translator =
-            ModalityTranslator::new(&root / "translator", flat_csi, n_ant, n_sc);
+            ModalityTranslator::new(&root / "translator", flat_csi, ant, n_sc);
         let backbone = Backbone::new(&root / "backbone", config.backbone_channels as i64);
         let kp_head = KeypointHead::new(
             &root / "kp_head",
@@ -126,10 +129,10 @@ impl WiFiDensePoseModel {
 
     /// Forward pass without gradient tracking (inference mode).
     pub fn forward_inference(&self, amplitude: &Tensor, phase: &Tensor) -> ModelOutput {
-        tch::no_grad(|| self.forward_impl(amplitude, phase, false))
+        torch::no_grad(|| self.forward_impl(amplitude, phase, false))
     }
 
-    /// Save model weights to a file (tch safetensors / .pt format).
+    /// Save model weights to a file (torch safetensors / .pt format).
     ///
     /// # Errors
     ///
@@ -186,7 +189,7 @@ impl WiFiDensePoseModel {
             .trainable_variables()
             .iter()
             .map(|t| t.numel())
-            .sum()
+            .sum::<usize>() as i64
     }
 
     // ------------------------------------------------------------------
@@ -275,6 +278,7 @@ fn phase_sanitize(phase: &Tensor) -> Tensor {
 /// # Returns
 ///
 /// Attended tensor `[B, n_ant, n_sc]` with irrelevant antenna paths suppressed.
+/// Apply min-cut gated attention over the antenna-path dimension.
 fn apply_antenna_attention(x: &Tensor, lambda: f32) -> Tensor {
     let sizes = x.size();
     let n_ant = sizes[1];
@@ -292,40 +296,38 @@ fn apply_antenna_attention(x: &Tensor, lambda: f32) -> Tensor {
     let device = x.device();
     let kind = x.kind();
 
-    // Process each batch element independently (attn_mincut operates on 2D inputs).
-    let mut results: Vec<Tensor> = Vec::with_capacity(b);
+    // 1. PCIe 병목 제거: 배치 전체를 한 번에 CPU로 이동
+    let x_cpu = x.to_device(Device::Cpu).to_kind(Kind::Float);
+    let x_flat: Vec<f32> = x_cpu.flatten(0, -1).try_into().expect("tensor to vec");
+    let elem_size = (n_ant * n_sc) as usize;
 
-    for bi in 0..b {
-        // Extract [n_ant, n_sc] slice for this batch element.
-        let xi = x.select(0, bi as i64); // [n_ant, n_sc]
+    // 2. Rayon 병렬 처리 부활 (수십 배 속도 향상)
+    let results: Vec<f32> = (0..b)
+        .into_par_iter()
+        .flat_map(|bi| {
+            let offset = bi * elem_size;
+            let xi_flat = &x_flat[offset..offset + elem_size];
 
-        // Move to CPU and convert to f32 for the pure-Rust attention kernel.
-        let flat: Vec<f32> =
-            Vec::from(xi.to_kind(Kind::Float).to_device(Device::Cpu).contiguous());
+            // Q = K = V = the antenna features (self-attention over antenna paths).
+            let out = attn_mincut(
+                xi_flat,
+                xi_flat,
+                xi_flat,
+                n_sc_usize,
+                n_ant_usize,
+                lambda,
+                1,
+                1e-6,
+            );
+            out.output
+        })
+        .collect();
 
-        // Q = K = V = the antenna features (self-attention over antenna paths).
-        let out = attn_mincut(
-            &flat,        // q: [n_ant * n_sc]
-            &flat,        // k: [n_ant * n_sc]
-            &flat,        // v: [n_ant * n_sc]
-            n_sc_usize,   // d: feature dim = n_sc subcarriers
-            n_ant_usize,  // seq_len: number of antenna paths
-            lambda,       // lambda: min-cut threshold
-            1,            // tau: no temporal hysteresis (single-frame)
-            1e-6,         // eps: numerical epsilon
-        );
-
-        let attended = Tensor::from_slice(&out.output)
-            .reshape([n_ant, n_sc])
-            .to_device(device)
-            .to_kind(kind);
-
-        results.push(attended);
-    }
-
-    Tensor::stack(&results, 0) // [B, n_ant, n_sc]
+    Tensor::from_slice(&results)
+        .reshape([b as i64, n_ant, n_sc])
+        .to_device(device)
+        .to_kind(kind)
 }
-
 /// Apply scaled dot-product attention over spatial locations.
 ///
 /// Input: `[B, C, H, W]` feature map — each spatial location (H×W) becomes a
@@ -354,8 +356,12 @@ fn apply_spatial_attention(x: &Tensor) -> Tensor {
     for bi in 0..b {
         // Extract [C, H*W] and transpose to [H*W, C].
         let xi = x.select(0, bi).reshape([c, h * w]).transpose(0, 1); // [H*W, C]
-        let flat: Vec<f32> =
-            Vec::from(xi.to_kind(Kind::Float).to_device(Device::Cpu).contiguous());
+        let flat: Vec<f32> = xi
+            .to_kind(Kind::Float)
+            .to_device(Device::Cpu)
+            .flatten(0, -1)
+            .try_into()
+            .expect("tensor to vec");
 
         // Build token slices — one per spatial position.
         let tokens: Vec<&[f32]> = (0..n_spatial)
@@ -394,128 +400,68 @@ fn apply_spatial_attention(x: &Tensor) -> Tensor {
 // Modality Translator
 // ---------------------------------------------------------------------------
 
-/// Translates flattened (amplitude, phase) CSI vectors into a pseudo-image.
+/// Translates flattened (amplitude, phase) CSI vectors into a `[B, 3, 48, 48]` pseudo-image.
 ///
 /// ```text
-/// amplitude [B, flat_csi] ─► attn_mincut ─► amp_fc1 ► relu ► amp_fc2 ► relu ─┐
-///                                                                                ├─► fuse_fc ► reshape ► spatial_conv ► [B, 3, 48, 48]
-/// phase     [B, flat_csi] ─► attn_mincut ─► ph_fc1  ► relu ► ph_fc2  ► relu ─┘
+/// amp [B, flat] ─► reshape [B, ant, T, sub] ─┐
+///                                              ├─ cat(ch) ─► Conv2d chain ─► upsample ─► tanh ─► [B, 3, 48, 48]
+/// ph  [B, flat] ─► reshape [B, ant, T, sub] ─┘
 /// ```
 ///
-/// The `attn_mincut` step performs self-attention over the antenna-path dimension
-/// (`n_ant` tokens, each with `n_sc` subcarrier features) to gate out irrelevant
-/// antenna-pair correlations before the FC fusion layers.
+/// For default config (ant=3, T=100, sub=56):
+///   cat → `[B, 6, 100, 56]` → Conv2d(6→64→32→3) → bilinear(48×48) → tanh
 struct ModalityTranslator {
-    amp_fc1: nn::Linear,
-    amp_fc2: nn::Linear,
-    ph_fc1: nn::Linear,
-    ph_fc2: nn::Linear,
-    fuse_fc: nn::Linear,
-    // Spatial refinement conv layers
-    sp_conv1: nn::Conv2D,
-    sp_bn1: nn::BatchNorm,
-    sp_conv2: nn::Conv2D,
-    /// Number of antenna paths: T * n_tx * n_rx (used for attention reshape).
+    conv1: nn::Conv2D,
+    gn1: nn::GroupNorm,
+    conv2: nn::Conv2D,
+    gn2: nn::GroupNorm,
+    out_conv: nn::Conv2D,
     n_ant: i64,
-    /// Number of subcarriers per antenna path (used for attention reshape).
-    n_sc: i64,
+    t: i64,
+    sub: i64,
 }
 
 impl ModalityTranslator {
     fn new(vs: nn::Path, flat_csi: i64, n_ant: i64, n_sc: i64) -> Self {
-        let amp_fc1 = nn::linear(&vs / "amp_fc1", flat_csi, 512, Default::default());
-        let amp_fc2 = nn::linear(&vs / "amp_fc2", 512, 256, Default::default());
-        let ph_fc1 = nn::linear(&vs / "ph_fc1", flat_csi, 512, Default::default());
-        let ph_fc2 = nn::linear(&vs / "ph_fc2", 512, 256, Default::default());
-        // Fuse 256+256 → 3*48*48
-        let fuse_fc = nn::linear(&vs / "fuse_fc", 512, 3 * 48 * 48, Default::default());
+        // T = flat_csi / (n_ant * n_sc) = 100
+        let t = flat_csi / (n_ant * n_sc);
 
-        // Two conv layers that mix spatial information in the pseudo-image.
-        let sp_conv1 = nn::conv2d(
-            &vs / "sp_conv1",
-            3,
-            32,
-            3,
-            nn::ConvConfig {
-                padding: 1,
-                bias: false,
-                ..Default::default()
-            },
-        );
-        let sp_bn1 = nn::batch_norm2d(&vs / "sp_bn1", 32, Default::default());
-        let sp_conv2 = nn::conv2d(
-            &vs / "sp_conv2",
-            32,
-            3,
-            3,
-            nn::ConvConfig {
-                padding: 1,
-                ..Default::default()
-            },
-        );
+        // Input channels: (amplitude + phase) × antennas = 2 × 3 = 6
+        let in_ch = 2 * n_ant;
 
-        ModalityTranslator {
-            amp_fc1,
-            amp_fc2,
-            ph_fc1,
-            ph_fc2,
-            fuse_fc,
-            sp_conv1,
-            sp_bn1,
-            sp_conv2,
-            n_ant,
-            n_sc,
-        }
+        // Conv layers preserve spatial structure (no Linear)
+        let conv1 = nn::conv2d(&vs / "conv1", in_ch, 64, 3, nn::ConvConfig { padding: 1, ..Default::default() });
+        // GroupNorm: normalises per-sample (not across batch), immune to identical-batch collapse.
+        // 8 groups for 64 channels → 8 features/group
+        let gn1 = nn::group_norm(&vs / "gn1", 8, 64, Default::default());
+
+        let conv2 = nn::conv2d(&vs / "conv2", 64, 32, 3, nn::ConvConfig { padding: 1, ..Default::default() });
+        // 8 groups for 32 channels → 4 features/group
+        let gn2 = nn::group_norm(&vs / "gn2", 8, 32, Default::default());
+
+        let out_conv = nn::conv2d(&vs / "out_conv", 32, 3, 3, nn::ConvConfig { padding: 1, ..Default::default() });
+
+        ModalityTranslator { conv1, gn1, conv2, gn2, out_conv, n_ant, t, sub: n_sc }
     }
 
-    fn forward_t(&self, amp: &Tensor, ph: &Tensor, train: bool) -> Tensor {
+    fn forward_t(&self, amp: &Tensor, ph: &Tensor, _train: bool) -> Tensor {
         let b = amp.size()[0];
 
-        // === ruvector-attn-mincut: gate irrelevant antenna paths ===
-        //
-        // Reshape from [B, flat_csi] to [B, n_ant, n_sc], apply min-cut
-        // self-attention over the antenna-path dimension (antenna paths are
-        // "tokens", subcarrier responses are "features"), then flatten back.
-        let amp_3d = amp.reshape([b, self.n_ant, self.n_sc]);
-        let ph_3d = ph.reshape([b, self.n_ant, self.n_sc]);
+        // Reshape flat CSI → 4D: [B, T*ant, sub] → [B, ant, T, sub]
+        let amp_3d = amp.reshape([b, self.t, self.n_ant, self.sub]).transpose(1, 2).contiguous();
+        let ph_3d = ph.reshape([b, self.t, self.n_ant, self.sub]).transpose(1, 2).contiguous();
 
-        let amp_attended = apply_antenna_attention(&amp_3d, 0.3);
-        let ph_attended = apply_antenna_attention(&ph_3d, 0.3);
+        // Cat amplitude + phase along channel dim → [B, 2*ant, T, sub] = [B, 6, 100, 56]
+        let x = Tensor::cat(&[amp_3d, ph_3d], 1);
 
-        let amp_flat = amp_attended.reshape([b, -1]); // [B, flat_csi]
-        let ph_flat = ph_attended.reshape([b, -1]); // [B, flat_csi]
+        // Conv feature extraction with GroupNorm (batch-independent normalisation)
+        // [B, 6, 100, 56] → [B, 64, 100, 56] → [B, 32, 100, 56] → [B, 3, 100, 56]
+        let x = x.apply(&self.conv1).apply(&self.gn1).relu();
+        let x = x.apply(&self.conv2).apply(&self.gn2).relu();
+        let x = x.apply(&self.out_conv);
 
-        // Amplitude branch (uses attended input)
-        let a = amp_flat
-            .apply(&self.amp_fc1)
-            .relu()
-            .dropout(0.2, train)
-            .apply(&self.amp_fc2)
-            .relu();
-
-        // Phase branch (uses attended input)
-        let p = ph_flat
-            .apply(&self.ph_fc1)
-            .relu()
-            .dropout(0.2, train)
-            .apply(&self.ph_fc2)
-            .relu();
-
-        // Fuse and reshape to spatial map
-        let fused = Tensor::cat(&[a, p], 1) // [B, 512]
-            .apply(&self.fuse_fc) // [B, 3*48*48]
-            .view([b, 3, 48, 48])
-            .relu();
-
-        // Spatial refinement
-        let out = fused
-            .apply(&self.sp_conv1)
-            .apply_t(&self.sp_bn1, train)
-            .relu()
-            .apply(&self.sp_conv2)
-            .tanh(); // bound to [-1, 1] before backbone
-
-        out
+        // Bilinear interpolation to backbone input size → [B, 3, 48, 48]
+        x.upsample_bilinear2d(&[48, 48], false, None, None).tanh()
     }
 }
 
@@ -865,7 +811,7 @@ impl DensePoseHead {
 mod tests {
     use super::*;
     use crate::config::TrainingConfig;
-    use tch::Device;
+    use torch::Device;
 
     fn tiny_config() -> TrainingConfig {
         let mut cfg = TrainingConfig::default();
@@ -882,7 +828,7 @@ mod tests {
 
     #[test]
     fn model_forward_output_shapes() {
-        tch::manual_seed(0);
+        torch::manual_seed(0);
         let cfg = tiny_config();
         let device = Device::Cpu;
         let model = WiFiDensePoseModel::new(&cfg, device);
@@ -914,7 +860,7 @@ mod tests {
 
     #[test]
     fn model_has_nonzero_parameters() {
-        tch::manual_seed(0);
+        torch::manual_seed(0);
         let cfg = tiny_config();
         let model = WiFiDensePoseModel::new(&cfg, Device::Cpu);
         let n = model.num_parameters();
@@ -923,7 +869,7 @@ mod tests {
 
     #[test]
     fn inference_mode_gives_same_shapes() {
-        tch::manual_seed(0);
+        torch::manual_seed(0);
         let cfg = tiny_config();
         let model = WiFiDensePoseModel::new(&cfg, Device::Cpu);
 
@@ -942,7 +888,7 @@ mod tests {
 
     #[test]
     fn uv_coords_bounded_zero_one() {
-        tch::manual_seed(0);
+        torch::manual_seed(0);
         let cfg = tiny_config();
         let model = WiFiDensePoseModel::new(&cfg, Device::Cpu);
 
@@ -1000,7 +946,7 @@ mod tests {
     fn save_and_load_roundtrip() {
         use tempfile::tempdir;
 
-        tch::manual_seed(42);
+        torch::manual_seed(42);
         let cfg = tiny_config();
         let mut model = WiFiDensePoseModel::new(&cfg, Device::Cpu);
 

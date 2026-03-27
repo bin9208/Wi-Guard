@@ -18,7 +18,7 @@
 //!     A01/
 //!       wifi_csi.npy          # amplitude  [T, n_tx, n_rx, n_sc]
 //!       wifi_csi_phase.npy    # phase       [T, n_tx, n_rx, n_sc]
-//!       gt_keypoints.npy      # ground-truth keypoints [T, 17, 3] (x, y, vis)
+//!       ground_truth.npy      # ground-truth keypoints [T, 17, 3] (x, y, vis)
 //!     A02/
 //!       ...
 //!   S02/
@@ -43,6 +43,9 @@
 use ndarray::{Array1, Array2, Array4};
 use ruvector_temporal_tensor::segment as tt_segment;
 use ruvector_temporal_tensor::{TemporalTensorCompressor, TierPolicy};
+use parking_lot::RwLock;
+use std::collections::HashMap;
+use std::sync::Arc;
 use std::path::{Path, PathBuf};
 use tracing::{debug, info, warn};
 
@@ -90,6 +93,9 @@ pub struct CsiSample {
 
     /// Absolute frame index within the original recording.
     pub frame_id: u64,
+
+    /// Environment identifier (e.g. 1 for `E01`).
+    pub env_id: u32,
 }
 
 // ---------------------------------------------------------------------------
@@ -112,6 +118,17 @@ pub trait CsiDataset: Send + Sync {
     /// dataset-specific errors for IO or format problems.
     fn get(&self, idx: usize) -> Result<CsiSample, DatasetError>;
 
+    /// Used for cross-subject train/validation splits without loading full tensors.
+    fn subject_id(&self, _idx: usize) -> Option<u32> {
+        None
+    }
+
+    /// Optional environment identifier for a given index.
+    /// Used for environment-aware splits.
+    fn environment_id(&self, _idx: usize) -> Option<u32> {
+        None
+    }
+
     /// Returns `true` when the dataset contains no samples.
     fn is_empty(&self) -> bool {
         self.len() == 0
@@ -119,6 +136,176 @@ pub trait CsiDataset: Send + Sync {
 
     /// Human-readable name for logging and progress display.
     fn name(&self) -> &str;
+}
+
+// ---------------------------------------------------------------------------
+// DatasetSubset
+// ---------------------------------------------------------------------------
+
+/// A view into a contiguous or non-contiguous subset of another dataset.
+pub struct DatasetSubset<'a> {
+    dataset: &'a dyn CsiDataset,
+    indices: Vec<usize>,
+    name: String,
+}
+
+impl<'a> DatasetSubset<'a> {
+    /// Create a new subset from a list of indices.
+    pub fn new(dataset: &'a dyn CsiDataset, indices: Vec<usize>, name: &str) -> Self {
+        DatasetSubset {
+            dataset,
+            indices,
+            name: name.to_string(),
+        }
+    }
+
+    /// Create a random 80/20 train/val split of the given dataset.
+    pub fn split(dataset: &'a dyn CsiDataset, train_ratio: f32, seed: u64) -> (Self, Self) {
+        let n = dataset.len();
+        let mut indices: Vec<usize> = (0..n).collect();
+        xorshift_shuffle(&mut indices, seed);
+
+        let n_train = (n as f32 * train_ratio) as usize;
+        let train_indices = indices[0..n_train].to_vec();
+        let val_indices = indices[n_train..].to_vec();
+
+        (
+            DatasetSubset::new(dataset, train_indices, &format!("{}_train", dataset.name())),
+            DatasetSubset::new(dataset, val_indices, &format!("{}_val", dataset.name())),
+        )
+    }
+
+    /// Create an 80/20 train/val split ensuring no subject overlap between sets.
+    pub fn split_by_subject(dataset: &'a dyn CsiDataset, train_ratio: f32, seed: u64) -> Result<(Self, Self), DatasetError> {
+        let n = dataset.len();
+
+        let mut subject_ids = std::collections::HashSet::new();
+        for i in 0..n {
+            if let Some(id) = dataset.subject_id(i) {
+                subject_ids.insert(id);
+            } else {
+                return Err(DatasetError::invalid_format(
+                    Path::new("dataset"),
+                    "Dataset does not support subject_id metadata required for subject split",
+                ));
+            }
+        }
+
+        let mut unique_subjects: Vec<u32> = subject_ids.into_iter().collect();
+        unique_subjects.sort_unstable(); // Deterministic base
+
+        let mut subj_indices: Vec<usize> = (0..unique_subjects.len()).collect();
+        xorshift_shuffle(&mut subj_indices, seed);
+
+        let n_train_subj = (unique_subjects.len() as f32 * train_ratio).round() as usize;
+        let mut train_subj_set = std::collections::HashSet::new();
+        for i in 0..n_train_subj {
+            train_subj_set.insert(unique_subjects[subj_indices[i]]);
+        }
+
+        let mut train_indices = Vec::with_capacity(n);
+        let mut val_indices = Vec::with_capacity(n);
+
+        for i in 0..n {
+            // We already verified subject_id is Some for all items
+            let subj = dataset.subject_id(i).unwrap();
+            if train_subj_set.contains(&subj) {
+                train_indices.push(i);
+            } else {
+                val_indices.push(i);
+            }
+        }
+
+        Ok((
+            DatasetSubset::new(dataset, train_indices, &format!("{}_train", dataset.name())),
+            DatasetSubset::new(dataset, val_indices, &format!("{}_val", dataset.name())),
+        ))
+    }
+
+    /// Create an environment-balanced 80/20 subject-based split.
+    ///
+    /// This ensures that each environment (E1, E2, E3, E4) is represented
+    /// in both train and validation sets, preventing environmental bias.
+    pub fn split_by_subject_balanced(
+        dataset: &'a dyn CsiDataset,
+        train_ratio: f32,
+        seed: u64,
+    ) -> (Self, Self) {
+        use std::collections::BTreeMap;
+
+        // 1. Group all sample indices by Subject ID and Environment ID
+        let mut groups: BTreeMap<u32, BTreeMap<u32, Vec<usize>>> = BTreeMap::new();
+        for i in 0..dataset.len() {
+            let sid = dataset.subject_id(i).unwrap_or(0);
+            let eid = dataset.environment_id(i).unwrap_or(0);
+            groups
+                .entry(eid)
+                .or_default()
+                .entry(sid)
+                .or_default()
+                .push(i);
+        }
+
+        let mut train_indices = Vec::new();
+        let mut val_indices = Vec::new();
+
+        // 2. For each environment, split its subjects
+        for (eid, subjects) in groups {
+            let mut sids: Vec<u32> = subjects.keys().copied().collect();
+            // Deterministic shuffle of subjects within this environment
+            let mut s_seed = seed ^ (eid as u64).wrapping_shl(32);
+            let n_s = sids.len();
+            for i in (1..n_s).rev() {
+                s_seed ^= s_seed << 13;
+                s_seed ^= s_seed >> 7;
+                s_seed ^= s_seed << 17;
+                let j = (s_seed as usize) % (i + 1);
+                sids.swap(i, j);
+            }
+
+            let split_idx = (sids.len() as f32 * train_ratio).round() as usize;
+            let (t_sids, v_sids) = sids.split_at(split_idx);
+
+            for sid in t_sids {
+                train_indices.extend(&subjects[sid]);
+            }
+            for sid in v_sids {
+                val_indices.extend(&subjects[sid]);
+            }
+        }
+
+        (
+            DatasetSubset::new(dataset, train_indices, &format!("{}_train", dataset.name())),
+            DatasetSubset::new(dataset, val_indices, &format!("{}_val", dataset.name())),
+        )
+    }
+}
+
+impl<'a> CsiDataset for DatasetSubset<'a> {
+    fn len(&self) -> usize {
+        self.indices.len()
+    }
+
+    fn get(&self, idx: usize) -> Result<CsiSample, DatasetError> {
+        if idx >= self.indices.len() {
+            return Err(DatasetError::IndexOutOfBounds {
+                idx,
+                len: self.indices.len(),
+            });
+        }
+        self.dataset.get(self.indices[idx])
+    }
+
+    fn subject_id(&self, idx: usize) -> Option<u32> {
+        if idx >= self.indices.len() {
+            return None;
+        }
+        self.dataset.subject_id(self.indices[idx])
+    }
+
+    fn name(&self) -> &str {
+        &self.name
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -255,12 +442,14 @@ struct MmFiEntry {
     amp_path: PathBuf,
     /// Path to `wifi_csi_phase.npy`.
     phase_path: PathBuf,
-    /// Path to `gt_keypoints.npy`.
+    /// Path to `ground_truth.npy`.
     kp_path: PathBuf,
     /// Number of temporal frames available in this clip.
     num_frames: usize,
     /// Window size in frames (mirrors config).
     window_frames: usize,
+    /// Environment id.
+    env_id: u32,
 }
 
 impl MmFiEntry {
@@ -295,6 +484,12 @@ pub struct MmFiDataset {
     /// Root directory stored for display / debug purposes.
     #[allow(dead_code)]
     root: PathBuf,
+    /// Cache for amplitude arrays [T, n_tx, n_rx, n_sc].
+    cache_amp: RwLock<HashMap<PathBuf, Arc<Array4<f32>>>>,
+    /// Cache for phase arrays [T, n_tx, n_rx, n_sc].
+    cache_phase: RwLock<HashMap<PathBuf, Arc<Array4<f32>>>>,
+    /// Cache for keypoint arrays [T, J, 3].
+    cache_kp: RwLock<HashMap<PathBuf, Arc<ndarray::Array3<f32>>>>,
 }
 
 impl MmFiDataset {
@@ -303,7 +498,7 @@ impl MmFiDataset {
     /// The scan walks `root/{S??}/{A??}/` directories and looks for:
     /// - `wifi_csi.npy`       – CSI amplitude
     /// - `wifi_csi_phase.npy` – CSI phase
-    /// - `gt_keypoints.npy`   – ground-truth keypoints
+    /// - `ground_truth.npy`   – ground-truth keypoints
     ///
     /// # Errors
     ///
@@ -324,63 +519,57 @@ impl MmFiDataset {
 
         let mut entries: Vec<MmFiEntry> = Vec::new();
 
-        // Walk subject directories (S01, S02, …)
-        let mut subject_dirs: Vec<PathBuf> = std::fs::read_dir(root)
+        // 1. Check for environment directories (E01, E02...) or subject directories (S01, S02...)
+        let root_dirs: Vec<PathBuf> = std::fs::read_dir(root)
             .map_err(|e| DatasetError::io_error(root, e))?
             .filter_map(|e| e.ok())
-            .filter(|e| e.file_type().map(|t| t.is_dir()).unwrap_or(false))
+            .filter(|e| e.path().is_dir())
             .map(|e| e.path())
             .collect();
-        subject_dirs.sort();
 
-        for subj_path in &subject_dirs {
-            let subj_name = subj_path.file_name().and_then(|n| n.to_str()).unwrap_or("");
-            let subject_id = parse_id_suffix(subj_name).unwrap_or(0);
+        let has_env_dirs = root_dirs.iter().any(|p| {
+            p.file_name()
+                .and_then(|n| n.to_str())
+                .map(|s| s.starts_with('E'))
+                .unwrap_or(false)
+        });
 
-            // Walk action directories (A01, A02, …)
-            let mut action_dirs: Vec<PathBuf> = std::fs::read_dir(subj_path)
-                .map_err(|e| DatasetError::io_error(subj_path.as_path(), e))?
-                .filter_map(|e| e.ok())
-                .filter(|e| e.file_type().map(|t| t.is_dir()).unwrap_or(false))
-                .map(|e| e.path())
-                .collect();
-            action_dirs.sort();
+        if has_env_dirs {
+            // Case A: root/{E??}/{S??}/{A??}
+            let mut env_dirs = root_dirs;
+            env_dirs.sort();
+            for env_path in &env_dirs {
+                let env_name = env_path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+                let env_id = parse_id_suffix(env_name).unwrap_or(0);
 
-            for action_path in &action_dirs {
-                let action_name =
-                    action_path.file_name().and_then(|n| n.to_str()).unwrap_or("");
-                let action_id = parse_id_suffix(action_name).unwrap_or(0);
+                let mut subject_dirs: Vec<PathBuf> = std::fs::read_dir(env_path)
+                    .map_err(|e| DatasetError::io_error(env_path.as_path(), e))?
+                    .filter_map(|e| e.ok())
+                    .filter(|e| e.path().is_dir())
+                    .map(|e| e.path())
+                    .collect();
+                subject_dirs.sort();
 
-                let amp_path = action_path.join("wifi_csi.npy");
-                let phase_path = action_path.join("wifi_csi_phase.npy");
-                let kp_path = action_path.join("gt_keypoints.npy");
-
-                if !amp_path.exists() || !kp_path.exists() {
-                    debug!(
-                        "Skipping {}: missing required files",
-                        action_path.display()
-                    );
-                    continue;
+                for subj_path in &subject_dirs {
+                    Self::scan_subject(
+                        subj_path,
+                        env_id,
+                        window_frames,
+                        &mut entries,
+                    )?;
                 }
-
-                // Peek at the amplitude shape to get the frame count.
-                let num_frames = match peek_npy_first_dim(&amp_path) {
-                    Ok(n) => n,
-                    Err(e) => {
-                        warn!("Cannot read shape from {}: {e}", amp_path.display());
-                        continue;
-                    }
-                };
-
-                entries.push(MmFiEntry {
-                    subject_id,
-                    action_id,
-                    amp_path,
-                    phase_path,
-                    kp_path,
-                    num_frames,
+            }
+        } else {
+            // Case B: root/{S??}/{A??}
+            let mut subject_dirs = root_dirs;
+            subject_dirs.sort();
+            for subj_path in &subject_dirs {
+                Self::scan_subject(
+                    subj_path,
+                    0, // Default env id
                     window_frames,
-                });
+                    &mut entries,
+                )?;
             }
         }
 
@@ -405,7 +594,66 @@ impl MmFiDataset {
             target_subcarriers,
             num_keypoints,
             root: root.to_path_buf(),
+            cache_amp: RwLock::new(HashMap::new()),
+            cache_phase: RwLock::new(HashMap::new()),
+            cache_kp: RwLock::new(HashMap::new()),
         })
+    }
+
+    /// Internal helper to scan a single subject directory for action subfolders.
+    fn scan_subject(
+        subj_path: &Path,
+        env_id: u32,
+        window_frames: usize,
+        entries: &mut Vec<MmFiEntry>,
+    ) -> Result<(), DatasetError> {
+        let subj_name = subj_path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+        let subject_id = parse_id_suffix(subj_name).unwrap_or(0);
+
+        debug!("Scanning subject directory: {}", subj_name);
+
+        // Walk action directories (A01, A02, …)
+        let mut action_dirs: Vec<PathBuf> = std::fs::read_dir(subj_path)
+            .map_err(|e| DatasetError::io_error(subj_path, e))?
+            .filter_map(|e| e.ok())
+            .filter(|e| e.path().is_dir())
+            .map(|e| e.path())
+            .collect();
+        action_dirs.sort();
+
+        for action_path in &action_dirs {
+            let action_name = action_path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+            let action_id = parse_id_suffix(action_name).unwrap_or(0);
+
+            let amp_path = action_path.join("wifi_csi.npy");
+            let phase_path = action_path.join("wifi_csi_phase.npy");
+            let kp_path = action_path.join("ground_truth.npy");
+
+            if !amp_path.exists() || !kp_path.exists() {
+                continue;
+            }
+
+            // Peek at the amplitude shape to get the frame count.
+            let num_frames = match peek_npy_first_dim(&amp_path) {
+                Ok(n) => n,
+                Err(e) => {
+                    warn!("Cannot read npy head {}: {e}", amp_path.display());
+                    continue;
+                }
+            };
+
+            entries.push(MmFiEntry {
+                subject_id,
+                action_id,
+                amp_path,
+                phase_path,
+                kp_path,
+                num_frames,
+                window_frames,
+                env_id,
+            });
+        }
+        Ok(())
     }
 
     /// Resolve a global sample index to `(entry_index, frame_offset)`.
@@ -429,6 +677,20 @@ impl CsiDataset for MmFiDataset {
         self.cumulative.last().copied().unwrap_or(0)
     }
 
+    fn name(&self) -> &str {
+        "MmFiDataset"
+    }
+
+    fn subject_id(&self, idx: usize) -> Option<u32> {
+        let (entry_idx, _) = self.locate(idx)?;
+        Some(self.entries[entry_idx].subject_id)
+    }
+
+    fn environment_id(&self, idx: usize) -> Option<u32> {
+        let (entry_idx, _) = self.locate(idx)?;
+        Some(self.entries[entry_idx].env_id)
+    }
+
     fn get(&self, idx: usize) -> Result<CsiSample, DatasetError> {
         let total = self.len();
         let (entry_idx, frame_offset) =
@@ -441,8 +703,20 @@ impl CsiDataset for MmFiDataset {
         let t_start = frame_offset;
         let t_end = t_start + self.window_frames;
 
-        // Load amplitude
-        let amp_full = load_npy_f32(&entry.amp_path)?;
+        // Load amplitude (with cache)
+        let amp_full = {
+            let read_lock = self.cache_amp.read();
+            if let Some(cached) = read_lock.get(&entry.amp_path) {
+                Arc::clone(cached)
+            } else {
+                drop(read_lock);
+                let loaded = Arc::new(load_npy_f32(&entry.amp_path)?);
+                let mut write_lock = self.cache_amp.write();
+                write_lock.insert(entry.amp_path.clone(), Arc::clone(&loaded));
+                loaded
+            }
+        };
+
         let (t, n_tx, n_rx, n_sc) = amp_full.dim();
         if t_end > t {
             return Err(DatasetError::invalid_format(
@@ -458,7 +732,18 @@ impl CsiDataset for MmFiDataset {
 
         // Load phase (optional – return zeros if the file is absent)
         let phase_window = if entry.phase_path.exists() {
-            let phase_full = load_npy_f32(&entry.phase_path)?;
+            let phase_full = {
+                let read_lock = self.cache_phase.read();
+                if let Some(cached) = read_lock.get(&entry.phase_path) {
+                    Arc::clone(cached)
+                } else {
+                    drop(read_lock);
+                    let loaded = Arc::new(load_npy_f32(&entry.phase_path)?);
+                    let mut write_lock = self.cache_phase.write();
+                    write_lock.insert(entry.phase_path.clone(), Arc::clone(&loaded));
+                    loaded
+                }
+            };
             phase_full
                 .slice(ndarray::s![t_start..t_end, .., .., ..])
                 .to_owned()
@@ -480,7 +765,18 @@ impl CsiDataset for MmFiDataset {
         };
 
         // Load keypoints [T, 17, 3] — take the first frame of the window
-        let kp_full = load_npy_kp(&entry.kp_path, self.num_keypoints)?;
+        let kp_full = {
+            let read_lock = self.cache_kp.read();
+            if let Some(cached) = read_lock.get(&entry.kp_path) {
+                Arc::clone(cached)
+            } else {
+                drop(read_lock);
+                let loaded = Arc::new(load_npy_kp(&entry.kp_path, self.num_keypoints)?);
+                let mut write_lock = self.cache_kp.write();
+                write_lock.insert(entry.kp_path.clone(), Arc::clone(&loaded));
+                loaded
+            }
+        };
         let kp_frame = kp_full
             .slice(ndarray::s![t_start, .., ..])
             .to_owned();
@@ -497,12 +793,10 @@ impl CsiDataset for MmFiDataset {
             subject_id: entry.subject_id,
             action_id: entry.action_id,
             frame_id: t_start as u64,
+            env_id: entry.env_id,
         })
     }
 
-    fn name(&self) -> &str {
-        "MmFiDataset"
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -899,6 +1193,20 @@ impl CsiDataset for SyntheticCsiDataset {
         self.num_samples
     }
 
+    fn name(&self) -> &str {
+        "SyntheticCsiDataset"
+    }
+
+    fn subject_id(&self, idx: usize) -> Option<u32> {
+        // Deterministic subject: cycle through 10 subjects
+        Some((idx % 10) as u32 + 1)
+    }
+
+    fn environment_id(&self, idx: usize) -> Option<u32> {
+        // Deterministic environment: cycle through 4 labs
+        Some((idx % 4) as u32 + 1)
+    }
+
     fn get(&self, idx: usize) -> Result<CsiSample, DatasetError> {
         if idx >= self.num_samples {
             return Err(DatasetError::IndexOutOfBounds {
@@ -938,12 +1246,10 @@ impl CsiDataset for SyntheticCsiDataset {
             subject_id: 0,
             action_id: 0,
             frame_id: idx as u64,
+            env_id: (idx % 4) as u32 + 1,
         })
     }
 
-    fn name(&self) -> &str {
-        "SyntheticCsiDataset"
-    }
 }
 
 // ---------------------------------------------------------------------------

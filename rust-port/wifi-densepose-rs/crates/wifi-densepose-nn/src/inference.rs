@@ -1,7 +1,7 @@
 //! Inference engine abstraction for neural network backends.
 //!
 //! This module provides a unified interface for running inference across
-//! different backends (ONNX Runtime, tch-rs, Candle).
+//! different backends (ONNX Runtime, torch-rs, Candle).
 
 use crate::densepose::{DensePoseConfig, DensePoseOutput};
 use crate::error::{NnError, NnResult};

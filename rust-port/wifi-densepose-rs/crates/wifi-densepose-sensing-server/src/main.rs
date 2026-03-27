@@ -9,6 +9,7 @@
 //! Replaces both ws_server.py and the Python HTTP server.
 
 mod adaptive_classifier;
+mod inference_bridge;
 mod rvf_container;
 mod rvf_pipeline;
 mod vital_signs;
@@ -144,6 +145,18 @@ struct Args {
     /// Build fingerprint index from embeddings (env|activity|temporal|person)
     #[arg(long, value_name = "TYPE")]
     build_index: Option<String>,
+
+    /// Path to trained PyTorch checkpoint (.pt) for real-time GPU inference
+    #[arg(long, value_name = "PATH")]
+    model_checkpoint: Option<PathBuf>,
+
+    /// Path to Z-score normalization stats JSON file (required with --model-checkpoint)
+    #[arg(long, value_name = "PATH")]
+    zscore_stats: Option<PathBuf>,
+
+    /// Inference stride: run model every N frames (default 5 → ~20 Hz at 100 FPS)
+    #[arg(long, default_value = "5")]
+    inference_stride: usize,
 }
 
 // ── Data types ───────────────────────────────────────────────────────────────
@@ -221,6 +234,9 @@ struct NodeInfo {
     position: [f64; 3],
     amplitude: Vec<f64>,
     subcarrier_count: usize,
+    /// Tick number when this node was last seen (for timeout detection).
+    #[serde(default, skip_serializing)]
+    last_seen_tick: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -361,6 +377,10 @@ struct AppStateInner {
     // ── Adaptive classifier (environment-tuned) ──────────────────────────
     /// Trained adaptive model (loaded from data/adaptive_model.json or trained at runtime).
     adaptive_model: Option<adaptive_classifier::AdaptiveModel>,
+    /// Sender for CSI frames to the GPU inference pipeline (None if no model loaded).
+    inference_frame_tx: Option<tokio::sync::mpsc::Sender<inference_bridge::CsiFrameSlim>>,
+    /// Watch receiver for the latest model-inferred pose (None if no model loaded).
+    inference_pose_rx: Option<tokio::sync::watch::Receiver<Vec<PersonDetection>>>,
 }
 
 /// Number of frames retained in `frame_history` for temporal analysis.
@@ -1196,6 +1216,13 @@ async fn windows_wifi_task(state: SharedState, tick_ms: u64) {
         if s_write_pre.frame_history.len() > FRAME_HISTORY_CAPACITY {
             s_write_pre.frame_history.pop_front();
         }
+
+        // Feed frame to GPU inference pipeline.
+        let slim = inference_bridge::CsiFrameSlim::from_esp32(
+            &frame.amplitudes, &frame.phases
+        );
+        send_frame_to_inference(&s_write_pre, &slim);
+
         let sample_rate_hz = 1000.0 / tick_ms as f64;
         let (features, mut classification, breathing_rate_hz, sub_variances, raw_motion) =
             extract_features_from_frame(&frame, &s_write_pre.frame_history, sample_rate_hz);
@@ -1268,6 +1295,7 @@ async fn windows_wifi_task(state: SharedState, tick_ms: u64) {
                 position: [0.0, 0.0, 0.0],
                 amplitude: multi_ap_frame.amplitudes,
                 subcarrier_count: obs_count,
+                last_seen_tick: Some(tick),
             }],
             features,
             classification,
@@ -1289,7 +1317,7 @@ async fn windows_wifi_task(state: SharedState, tick_ms: u64) {
         };
 
         // Populate persons from the sensing update.
-        let persons = derive_pose_from_sensing(&update);
+        let persons = get_inferred_pose(&s);
         if !persons.is_empty() {
             update.persons = Some(persons);
         }
@@ -1398,6 +1426,7 @@ async fn windows_wifi_fallback_tick(state: &SharedState, seq: u32) {
             position: [0.0, 0.0, 0.0],
             amplitude: vec![signal_pct],
             subcarrier_count: 1,
+            last_seen_tick: Some(tick),
         }],
         features,
         classification,
@@ -1418,7 +1447,7 @@ async fn windows_wifi_fallback_tick(state: &SharedState, seq: u32) {
         estimated_persons: if est_persons > 0 { Some(est_persons) } else { None },
     };
 
-    let persons = derive_pose_from_sensing(&update);
+    let persons = get_inferred_pose(&s);
     if !persons.is_empty() {
         update.persons = Some(persons);
     }
@@ -1574,32 +1603,10 @@ async fn handle_ws_pose_client(mut socket: WebSocket, state: SharedState) {
                                     "signal_derived"
                                 };
 
-                                let persons = if model_loaded {
-                                    // When a trained model is loaded, prefer its keypoints if present.
-                                    sensing.pose_keypoints.as_ref().map(|kps| {
-                                        let kp_names = [
-                                            "nose","left_eye","right_eye","left_ear","right_ear",
-                                            "left_shoulder","right_shoulder","left_elbow","right_elbow",
-                                            "left_wrist","right_wrist","left_hip","right_hip",
-                                            "left_knee","right_knee","left_ankle","right_ankle",
-                                        ];
-                                        let keypoints: Vec<PoseKeypoint> = kps.iter()
-                                            .enumerate()
-                                            .map(|(i, kp)| PoseKeypoint {
-                                                name: kp_names.get(i).unwrap_or(&"unknown").to_string(),
-                                                x: kp[0], y: kp[1], z: kp[2], confidence: kp[3],
-                                            })
-                                            .collect();
-                                        vec![PersonDetection {
-                                            id: 1,
-                                            confidence: sensing.classification.confidence,
-                                            bbox: BoundingBox { x: 260.0, y: 150.0, width: 120.0, height: 220.0 },
-                                            keypoints,
-                                            zone: "zone_1".into(),
-                                        }]
-                                    }).unwrap_or_else(|| derive_pose_from_sensing(&sensing))
-                                } else {
-                                    derive_pose_from_sensing(&sensing)
+                                // Get latest model-inferred pose (or empty []).
+                                let persons = {
+                                    let s = state.read().await;
+                                    get_inferred_pose(&s)
                                 };
 
                                 let pose_msg = serde_json::json!({
@@ -1740,194 +1747,29 @@ fn score_to_person_count(smoothed_score: f64) -> usize {
     }
 }
 
-/// Generate a single person's skeleton with per-person spatial offset and phase stagger.
-///
-/// `person_idx`: 0-based index of this person.
-/// `total_persons`: total number of detected persons (for spacing calculation).
-fn derive_single_person_pose(
-    update: &SensingUpdate,
-    person_idx: usize,
-    total_persons: usize,
-) -> PersonDetection {
-    let cls = &update.classification;
-    let feat = &update.features;
-
-    // Per-person phase offset: ~120 degrees apart so they don't move in sync.
-    let phase_offset = person_idx as f64 * 2.094;
-
-    // Spatial spread: persons distributed symmetrically around center.
-    let half = (total_persons as f64 - 1.0) / 2.0;
-    let person_x_offset = (person_idx as f64 - half) * 120.0; // 120px spacing
-
-    // Confidence decays for additional persons (less certain about person 2, 3).
-    let conf_decay = 1.0 - person_idx as f64 * 0.15;
-
-    // ── Signal-derived scalars ────────────────────────────────────────────────
-
-    let motion_score = (feat.motion_band_power / 15.0).clamp(0.0, 1.0);
-    let is_walking = motion_score > 0.55;
-    let breath_amp = (feat.breathing_band_power * 4.0).clamp(0.0, 12.0);
-
-    let breath_phase = if let Some(ref vs) = update.vital_signs {
-        let bpm = vs.breathing_rate_bpm.unwrap_or(15.0);
-        let freq = (bpm / 60.0).clamp(0.1, 0.5);
-        (update.tick as f64 * freq * 0.1 * std::f64::consts::TAU + phase_offset).sin()
-    } else {
-        (update.tick as f64 * 0.08 + feat.breathing_band_power + phase_offset).sin()
-    };
-
-    let lean_x = (feat.dominant_freq_hz / 5.0 - 1.0).clamp(-1.0, 1.0) * 18.0;
-
-    let stride_x = if is_walking {
-        let stride_phase = (feat.motion_band_power * 0.7 + update.tick as f64 * 0.12 + phase_offset).sin();
-        stride_phase * 45.0 * motion_score
-    } else {
-        0.0
-    };
-
-    let burst = (feat.change_points as f64 / 8.0).clamp(0.0, 1.0);
-
-    let noise_seed = feat.variance * 31.7 + update.tick as f64 * 17.3 + person_idx as f64 * 97.1;
-    let noise_val = (noise_seed.sin() * 43758.545).fract();
-
-    let snr_factor = ((feat.variance - 0.5) / 10.0).clamp(0.0, 1.0);
-    let base_confidence = cls.confidence * (0.6 + 0.4 * snr_factor) * conf_decay;
-
-    // ── Skeleton base position ────────────────────────────────────────────────
-
-    let base_x = 320.0 + stride_x + lean_x * 0.5 + person_x_offset;
-    let base_y = 240.0 - motion_score * 8.0;
-
-    // ── COCO 17-keypoint offsets from hip-center ──────────────────────────────
-
-    let kp_names = [
-        "nose", "left_eye", "right_eye", "left_ear", "right_ear",
-        "left_shoulder", "right_shoulder", "left_elbow", "right_elbow",
-        "left_wrist", "right_wrist", "left_hip", "right_hip",
-        "left_knee", "right_knee", "left_ankle", "right_ankle",
-    ];
-
-    let kp_offsets: [(f64, f64); 17] = [
-        (  0.0,  -80.0), // 0  nose
-        ( -8.0,  -88.0), // 1  left_eye
-        (  8.0,  -88.0), // 2  right_eye
-        (-16.0,  -82.0), // 3  left_ear
-        ( 16.0,  -82.0), // 4  right_ear
-        (-30.0,  -50.0), // 5  left_shoulder
-        ( 30.0,  -50.0), // 6  right_shoulder
-        (-45.0,  -15.0), // 7  left_elbow
-        ( 45.0,  -15.0), // 8  right_elbow
-        (-50.0,   20.0), // 9  left_wrist
-        ( 50.0,   20.0), // 10 right_wrist
-        (-20.0,   20.0), // 11 left_hip
-        ( 20.0,   20.0), // 12 right_hip
-        (-22.0,   70.0), // 13 left_knee
-        ( 22.0,   70.0), // 14 right_knee
-        (-24.0,  120.0), // 15 left_ankle
-        ( 24.0,  120.0), // 16 right_ankle
-    ];
-
-    const TORSO_KP: [usize; 4] = [5, 6, 11, 12];
-    const EXTREMITY_KP: [usize; 4] = [9, 10, 15, 16];
-
-    let keypoints: Vec<PoseKeypoint> = kp_names.iter().zip(kp_offsets.iter())
-        .enumerate()
-        .map(|(i, (name, (dx, dy)))| {
-            let breath_dx = if TORSO_KP.contains(&i) {
-                let sign = if *dx < 0.0 { -1.0 } else { 1.0 };
-                sign * breath_amp * breath_phase * 0.5
-            } else {
-                0.0
-            };
-            let breath_dy = if TORSO_KP.contains(&i) {
-                let sign = if *dy < 0.0 { -1.0 } else { 1.0 };
-                sign * breath_amp * breath_phase * 0.3
-            } else {
-                0.0
-            };
-
-            let extremity_jitter = if EXTREMITY_KP.contains(&i) {
-                let phase = noise_seed + i as f64 * 2.399;
-                (
-                    phase.sin() * burst * motion_score * 12.0,
-                    (phase * 1.31).cos() * burst * motion_score * 8.0,
-                )
-            } else {
-                (0.0, 0.0)
-            };
-
-            let kp_noise_x = ((noise_seed + i as f64 * 1.618).sin() * 43758.545).fract()
-                * feat.variance.sqrt().clamp(0.0, 3.0) * motion_score;
-            let kp_noise_y = ((noise_seed + i as f64 * 2.718).cos() * 31415.926).fract()
-                * feat.variance.sqrt().clamp(0.0, 3.0) * motion_score * 0.6;
-
-            let swing_dy = if is_walking {
-                let stride_phase =
-                    (feat.motion_band_power * 0.7 + update.tick as f64 * 0.12 + phase_offset).sin();
-                match i {
-                    7 | 9  => -stride_phase * 20.0 * motion_score,
-                    8 | 10 =>  stride_phase * 20.0 * motion_score,
-                    13 | 15 =>  stride_phase * 25.0 * motion_score,
-                    14 | 16 => -stride_phase * 25.0 * motion_score,
-                    _ => 0.0,
-                }
-            } else {
-                0.0
-            };
-
-            let final_x = base_x + dx + breath_dx + extremity_jitter.0 + kp_noise_x;
-            let final_y = base_y + dy + breath_dy + extremity_jitter.1 + kp_noise_y + swing_dy;
-
-            let kp_conf = if EXTREMITY_KP.contains(&i) {
-                base_confidence * (0.7 + 0.3 * snr_factor) * (0.85 + 0.15 * noise_val)
-            } else {
-                base_confidence * (0.88 + 0.12 * ((i as f64 * 0.7 + noise_seed).cos()))
-            };
-
-            PoseKeypoint {
-                name: name.to_string(),
-                x: final_x,
-                y: final_y,
-                z: lean_x * 0.02,
-                confidence: kp_conf.clamp(0.1, 1.0),
-            }
-        })
-        .collect();
-
-    let xs: Vec<f64> = keypoints.iter().map(|k| k.x).collect();
-    let ys: Vec<f64> = keypoints.iter().map(|k| k.y).collect();
-    let min_x = xs.iter().cloned().fold(f64::MAX, f64::min) - 10.0;
-    let min_y = ys.iter().cloned().fold(f64::MAX, f64::min) - 10.0;
-    let max_x = xs.iter().cloned().fold(f64::MIN, f64::max) + 10.0;
-    let max_y = ys.iter().cloned().fold(f64::MIN, f64::max) + 10.0;
-
-    PersonDetection {
-        id: (person_idx + 1) as u32,
-        confidence: cls.confidence * conf_decay,
-        keypoints,
-        bbox: BoundingBox {
-            x: min_x,
-            y: min_y,
-            width: (max_x - min_x).max(80.0),
-            height: (max_y - min_y).max(160.0),
-        },
-        zone: format!("zone_{}", person_idx + 1),
+/// Get the latest model-inferred pose from the watch channel, or empty if no model.
+fn get_inferred_pose(state: &AppStateInner) -> Vec<PersonDetection> {
+    match &state.inference_pose_rx {
+        Some(rx) => rx.borrow().clone(),
+        None => vec![],
     }
 }
 
-fn derive_pose_from_sensing(update: &SensingUpdate) -> Vec<PersonDetection> {
-    let cls = &update.classification;
-    if !cls.presence {
-        return vec![];
+/// Send a CSI frame to the GPU inference pipeline (non-blocking, drops if full).
+fn send_frame_to_inference(state: &AppStateInner, frame: &crate::inference_bridge::CsiFrameSlim) {
+    if let Some(ref tx) = state.inference_frame_tx {
+        if tx.try_send(frame.clone()).is_err() {
+            debug!("Inference frame channel full — dropped 1 frame");
+        }
     }
-
-    // Use estimated_persons if set by the tick loop; otherwise default to 1.
-    let person_count = update.estimated_persons.unwrap_or(1).max(1);
-
-    (0..person_count)
-        .map(|idx| derive_single_person_pose(update, idx, person_count))
-        .collect()
 }
+
+// ── DELETED: derive_single_person_pose (fake rule-based animation) ──────────
+// ── DELETED: derive_pose_from_sensing (fake rule-based animation) ────────────
+
+// Fake inference functions (derive_single_person_pose, derive_pose_from_sensing)
+// have been completely removed. All pose data now comes from the GPU inference
+// pipeline via the watch channel, or is empty [] if no model is loaded.
 
 // ── DensePose-compatible REST endpoints ─────────────────────────────────────
 
@@ -2007,10 +1849,7 @@ async fn api_info(State(state): State<SharedState>) -> Json<serde_json::Value> {
 
 async fn pose_current(State(state): State<SharedState>) -> Json<serde_json::Value> {
     let s = state.read().await;
-    let persons = match &s.latest_update {
-        Some(update) => derive_pose_from_sensing(update),
-        None => vec![],
-    };
+    let persons = get_inferred_pose(&s);
     Json(serde_json::json!({
         "timestamp": chrono::Utc::now().timestamp_millis() as f64 / 1000.0,
         "persons": persons,
@@ -2799,6 +2638,12 @@ async fn udp_receiver_task(state: SharedState, udp_port: u16) {
                         s.frame_history.pop_front();
                     }
 
+                    // Feed frame to GPU inference pipeline.
+                    let slim = inference_bridge::CsiFrameSlim::from_esp32(
+                        &frame.amplitudes, &frame.phases
+                    );
+                    send_frame_to_inference(&s, &slim);
+
                     let sample_rate_hz = 1000.0 / 500.0_f64; // default tick; ESP32 frames arrive as fast as they come
                     let (features, mut classification, breathing_rate_hz, sub_variances, raw_motion) =
                         extract_features_from_frame(&frame, &s.frame_history, sample_rate_hz);
@@ -2840,6 +2685,12 @@ async fn udp_receiver_task(state: SharedState, udp_port: u16) {
                         position: [2.0, 0.0, 1.5],
                         amplitude: frame.amplitudes.iter().take(56).cloned().collect(),
                         subcarrier_count: frame.n_subcarriers as usize,
+                        last_seen_tick: Some(tick),
+                    });
+
+                    // Prune stale nodes (no data for 100+ ticks ≈ 10s)
+                    s.active_nodes.retain(|_, n| {
+                        n.last_seen_tick.map_or(false, |t| tick.saturating_sub(t) < 100)
                     });
                     
                     let mut current_nodes: Vec<NodeInfo> = s.active_nodes.values().cloned().collect();
@@ -2870,7 +2721,7 @@ async fn udp_receiver_task(state: SharedState, udp_port: u16) {
                         estimated_persons: if est_persons > 0 { Some(est_persons) } else { None },
                     };
 
-                    let persons = derive_pose_from_sensing(&update);
+                    let persons = get_inferred_pose(&s);
                     if !persons.is_empty() {
                         update.persons = Some(persons);
                     }
@@ -2910,11 +2761,17 @@ async fn simulated_data_task(state: SharedState, tick_ms: u64) {
             s.frame_history.pop_front();
         }
 
+        // Feed frame to GPU inference pipeline.
+        let slim = inference_bridge::CsiFrameSlim::from_esp32(
+            &frame.amplitudes, &frame.phases
+        );
+        send_frame_to_inference(&s, &slim);
+
         let sample_rate_hz = 1000.0 / tick_ms as f64;
         let (features, mut classification, breathing_rate_hz, sub_variances, raw_motion) =
             extract_features_from_frame(&frame, &s.frame_history, sample_rate_hz);
         smooth_and_classify(&mut s, &mut classification, raw_motion);
-    adaptive_override(&s, &features, &mut classification);
+        adaptive_override(&s, &features, &mut classification);
 
         s.rssi_history.push_back(features.mean_rssi);
         if s.rssi_history.len() > 60 {
@@ -2955,6 +2812,7 @@ async fn simulated_data_task(state: SharedState, tick_ms: u64) {
                 position: [2.0, 0.0, 1.5],
                 amplitude: frame_amplitudes,
                 subcarrier_count: frame_n_sub as usize,
+                last_seen_tick: Some(tick),
             }],
             features: features.clone(),
             classification,
@@ -2986,7 +2844,7 @@ async fn simulated_data_task(state: SharedState, tick_ms: u64) {
         };
 
         // Populate persons from the sensing update.
-        let persons = derive_pose_from_sensing(&update);
+        let persons = get_inferred_pose(&s);
         if !persons.is_empty() {
             update.persons = Some(persons);
         }
@@ -3556,6 +3414,37 @@ async fn main() {
         }
     }
 
+    // ── GPU inference pipeline (--model-checkpoint) ──
+    let (inference_frame_tx, inference_pose_rx) = if let Some(ref ckpt) = args.model_checkpoint {
+        let zscore_path = args.zscore_stats.clone().unwrap_or_else(|| {
+            let mut p = ckpt.clone();
+            p.set_extension("zscore.json");
+            p
+        });
+        let config = inference_bridge::InferencePipelineConfig {
+            checkpoint_path: ckpt.clone(),
+            zscore_path,
+            inference_stride: args.inference_stride,
+            confidence_threshold: 0.15,
+            canvas_width: 640.0,
+            canvas_height: 480.0,
+        };
+        match inference_bridge::spawn_inference_pipeline(config) {
+            Ok((tx, rx)) => {
+                info!("GPU inference pipeline active (stride={})", args.inference_stride);
+                (Some(tx), Some(rx))
+            }
+            Err(e) => {
+                error!("Failed to start inference pipeline: {e}");
+                error!("Server will return empty pose data (no fake inference).");
+                (None, None)
+            }
+        }
+    } else {
+        info!("No --model-checkpoint provided. Pose data will be empty [].");
+        (None, None)
+    };
+
     // Ensure data directories exist for models and recordings
     let _ = std::fs::create_dir_all("data/models");
     let _ = std::fs::create_dir_all("data/recordings");
@@ -3615,6 +3504,8 @@ async fn main() {
                   m.trained_frames, m.training_accuracy * 100.0);
             m
         }),
+        inference_frame_tx,
+        inference_pose_rx,
     }));
 
     // Start background tasks based on source
@@ -3639,6 +3530,7 @@ async fn main() {
     let ws_state = state.clone();
     let ws_app = Router::new()
         .route("/ws/sensing", get(ws_sensing_handler))
+        .route("/ws/pose", get(ws_pose_handler))
         .route("/health", get(health))
         .with_state(ws_state);
 
@@ -3686,8 +3578,9 @@ async fn main() {
         // Stream endpoints
         .route("/api/v1/stream/status", get(stream_status))
         .route("/api/v1/stream/pose", get(ws_pose_handler))
-        // Sensing WebSocket on the HTTP port so the UI can reach it without a second port
+        // Sensing/Pose WebSocket on the HTTP port so the UI can reach it without a second port
         .route("/ws/sensing", get(ws_sensing_handler))
+        .route("/ws/pose", get(ws_pose_handler))
         // Model management endpoints (UI compatibility)
         .route("/api/v1/models", get(list_models))
         .route("/api/v1/models/active", get(get_active_model))

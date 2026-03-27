@@ -4,7 +4,7 @@
 //! Components: [`GradientReversalLayer`], [`DomainFactorizer`],
 //! [`DomainClassifier`], and [`AdversarialSchedule`].
 //!
-//! All computations are pure Rust on `&[f32]` slices (no `tch`, no GPU).
+//! All computations are pure Rust on `&[f32]` slices (no `torch`, no GPU).
 
 // ---------------------------------------------------------------------------
 // Helper math functions

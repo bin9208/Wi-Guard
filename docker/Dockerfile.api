@@ -1,0 +1,56 @@
+# RuView Sensing API Server
+# FastAPI REST API + WebSocket sensing pipeline in a single container
+
+FROM python:3.11-slim-bookworm
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY v1/requirements-lock.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir \
+        websockets \
+        uvicorn[standard] \
+        fastapi \
+        pydantic \
+        pydantic-settings \
+        python-jose[cryptography] \
+        passlib[bcrypt] \
+        python-multipart \
+        psutil \
+        httpx \
+        aiofiles
+
+# Copy application code
+COPY v1/ /app/v1/
+COPY ui/ /app/ui/
+
+# Expose ports:
+#   8000 — FastAPI REST API (Sensing API + Swagger docs)
+#   8765 — WebSocket sensing stream
+#   5005 — ESP32 UDP CSI ingestion
+EXPOSE 8000
+EXPOSE 8765
+EXPOSE 5005/udp
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Default: auto-detect data source
+ENV CSI_SOURCE=auto
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+    CMD curl -f http://localhost:8000/api/v1/sensing/current || exit 1
+
+# Start both the FastAPI server and the WebSocket sensing server
+# The entrypoint script runs both processes
+COPY docker/entrypoint-api.sh /app/entrypoint-api.sh
+RUN chmod +x /app/entrypoint-api.sh
+
+CMD ["/app/entrypoint-api.sh"]

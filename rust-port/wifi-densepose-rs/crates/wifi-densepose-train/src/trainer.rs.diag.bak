@@ -32,7 +32,7 @@ use crate::losses::{LossWeights, WiFiDensePoseLoss};
 use crate::losses::generate_target_heatmaps;
 use crate::metrics::{MetricsAccumulator, MetricsResult};
 use crate::model::WiFiDensePoseModel;
-use crate::virtual_aug::CsiAugmentor;
+use crate::virtual_aug::{VirtualDomainAugmentor, Xorshift64};
 
 // ---------------------------------------------------------------------------
 // Public result types
@@ -84,7 +84,8 @@ pub struct Trainer {
     config: TrainingConfig,
     model: WiFiDensePoseModel,
     device: Device,
-    csi_aug: CsiAugmentor,
+    aug_rng: Xorshift64,
+    virtual_aug: VirtualDomainAugmentor,
 }
 
 impl Trainer {
@@ -108,16 +109,15 @@ impl Trainer {
         torch::manual_seed(config.seed as i64);
 
         let model = WiFiDensePoseModel::new(&config, device);
-        let n_ant = (config.num_antennas_tx * config.num_antennas_rx) as i64;
-        let n_time = config.window_frames as i64;
-        let n_sub = config.num_subcarriers as i64;
-        let csi_aug = CsiAugmentor::new(n_ant, n_time, n_sub, device);
+        let aug_rng = Xorshift64::new(config.seed);
+        let virtual_aug = VirtualDomainAugmentor::default();
 
         Trainer {
             config,
             model,
             device,
-            csi_aug,
+            aug_rng,
+            virtual_aug,
         }
     }
 
@@ -289,45 +289,29 @@ impl Trainer {
                     continue;
                 }
 
-                let (amp_raw, phase_raw, kp_batch, vis_batch) = collate(&samples, self.device);
+                let (mut amp_batch, mut phase_batch, kp_batch, vis_batch) = collate(&samples, self.device);
 
-                // ── Physics-based CSI augmentation (training only) ────────
-                // 6 transforms: amp jitter, phase drift, noise, subcarrier
-                // mask, temporal mask, antenna dropout — all GPU tensor ops.
-                let (mut amp_batch, mut phase_batch) = self.csi_aug.augment(&amp_raw, &phase_raw);
+                // ── B2: Virtual Domain Augmentation ───────────────────────
+                // Apply to amplitude tensor [B, T*ant, sub]
+                let batch_size_curr = amp_batch.size()[0];
+                for b in 0..batch_size_curr {
+                    let mut amp_vec: Vec<f32> = amp_batch.select(0, b).to_kind(Kind::Float).to_device(Device::Cpu).flatten(0, -1).try_into().expect("tensor to vec");
+                    let domain = self.virtual_aug.generate_domain(&mut self.aug_rng);
+                    amp_vec = self.virtual_aug.augment_frame(&amp_vec, &domain);
+                    let augmented_tensor = Tensor::from_slice(&amp_vec).reshape(amp_batch.size().as_slice()[1..].to_vec()).to_device(self.device);
+                    // FIX: narrow(0, b, 1) targets only sample b, not the entire batch.
+                    // The old amp_batch.copy_() broadcast [1,...] to [B,...], overwriting all samples.
+                    let _ = amp_batch.narrow(0, b, 1).copy_(&augmented_tensor.unsqueeze(0));
+                }
+
+                // ── B3: Enhanced CSI data augmentation (training only) ─────
+                let (mut amp_batch, mut phase_batch) = self.augment_csi_enhanced(&amp_batch, &phase_batch);
 
                 // Robust check for finite values to avoid overflow panic.
                 if amp_batch.isfinite().all().int64_value(&[]) == 0 || kp_batch.isfinite().all().int64_value(&[]) == 0 {
                     warn!("Non-finite values detected in training batch ground truth/input! Skipping batch.");
                     cursor = end;
                     continue;
-                }
-
-                // ── [DIAG] CSI input scale check: epoch 0, first batch only ──
-                if epoch <= 1 && n_batches == 0 {
-                    let amp_min = amp_batch.min().double_value(&[]);
-                    let amp_max = amp_batch.max().double_value(&[]);
-                    let amp_mean = amp_batch.mean(Kind::Float).double_value(&[]);
-                    let amp_std = amp_batch.std(true).double_value(&[]);
-
-                    let ph_min = phase_batch.min().double_value(&[]);
-                    let ph_max = phase_batch.max().double_value(&[]);
-                    let ph_mean = phase_batch.mean(Kind::Float).double_value(&[]);
-                    let ph_std = phase_batch.std(true).double_value(&[]);
-
-                    let kp_min = kp_batch.min().double_value(&[]);
-                    let kp_max = kp_batch.max().double_value(&[]);
-                    let kp_mean = kp_batch.mean(Kind::Float).double_value(&[]);
-
-                    let vis_sum = vis_batch.gt(0.0).to_kind(Kind::Float).sum(Kind::Float).double_value(&[]);
-                    let vis_total = vis_batch.numel() as f64;
-
-                    info!("================ CSI INPUT SCALE X-RAY (epoch {epoch}) ================");
-                    info!("Amplitude | min={amp_min:.4} max={amp_max:.4} mean={amp_mean:.4} std={amp_std:.4}");
-                    info!("Phase     | min={ph_min:.4} max={ph_max:.4} mean={ph_mean:.4} std={ph_std:.4}");
-                    info!("GT Keypts | min={kp_min:.4} max={kp_max:.4} mean={kp_mean:.4}");
-                    info!("Visible   | {vis_sum:.0}/{vis_total:.0} joints ({:.1}%)", vis_sum / vis_total * 100.0);
-                    info!("====================================================================");
                 }
 
                 let output = self.model.forward_train(&amp_batch, &phase_batch);
@@ -342,53 +326,45 @@ impl Trainer {
                 );
 
                 // Binary visibility mask [B, 17].
-                let vis_mask = (vis_batch.gt(0.0)).to_kind(Kind::Float);
+                let mut vis_mask = (vis_batch.gt(0.0)).to_kind(Kind::Float);
 
-                // ── Heatmap loss (spatial structure) ────────────────────
-                let (hm_loss_tensor, loss_out) = loss_fn.forward(
+                // ── B5: Mixup Augmentation (p=0.3) ────────────────────────
+                let coin_mix: f64 = Tensor::rand([], (Kind::Double, Device::Cpu)).double_value(&[]);
+                if coin_mix < self.config.mixup_prob && batch_size_curr > 1 {
+                    let lambda = self.sample_beta(self.config.mixup_alpha, self.config.mixup_alpha);
+                    let index = Tensor::randperm(batch_size_curr, (Kind::Int64, self.device));
+                    
+                    let amp_batch_flipped = amp_batch.index_select(0, &index);
+                    let phase_batch_flipped = phase_batch.index_select(0, &index);
+                    let target_hm_flipped = target_hm.index_select(0, &index);
+                    let vis_mask_flipped = vis_mask.index_select(0, &index);
+
+                    amp_batch = amp_batch * lambda + amp_batch_flipped * (1.0 - lambda);
+                    phase_batch = phase_batch * lambda + phase_batch_flipped * (1.0 - lambda);
+                    target_hm = target_hm * lambda + target_hm_flipped * (1.0 - lambda);
+                    vis_mask = vis_mask * lambda + vis_mask_flipped * (1.0 - lambda);
+                }
+
+                // Compute keypoint loss only (no DensePose GT in this pipeline).
+                let (total_tensor, loss_out) = loss_fn.forward(
                     &output.keypoints,
                     &target_hm,
                     &vis_mask,
                     None, None, None, None, None, None,
                 );
 
-                // ── Direct coordinate regression L1 loss ───────────────
-                // Soft-argmax is differentiable → gradient flows back through
-                // the entire network, providing a DIRECT "move prediction
-                // toward the correct location" signal.
-                // This breaks mean-pose collapse by penalising the distance
-                // between predicted and GT coordinates, not pixel-wise heatmap error.
-                let pred_coords = heatmap_to_keypoints_soft_argmax(&output.keypoints);
-                // pred_coords: [B, 17, 2] in [0, 1]
-                // kp_batch:    [B, 17, 2] in [0, 1]
-                let coord_diff = (&pred_coords - &kp_batch).abs(); // [B, 17, 2]
-                let coord_l1_per_joint = coord_diff.mean_dim(
-                    &[2_i64][..], false, Kind::Float,
-                ); // [B, 17]
-                let masked_coord = &coord_l1_per_joint * &vis_mask;
-                let n_vis = vis_mask.sum(Kind::Float).clamp(1.0, 1e12);
-                let coord_loss = masked_coord.sum(Kind::Float) / &n_vis;
-                let coord_loss_val: f64 = coord_loss.double_value(&[]);
-
-                // Combined: heatmap + 10× coordinate L1.
-                // The 10× weight is intentionally high to dominate early training
-                // and FORCE the model to break out of mean-pose collapse.
-                let lambda_coord = 10.0;
-                let total_tensor = &hm_loss_tensor + coord_loss * lambda_coord;
-
                 opt.zero_grad();
                 total_tensor.backward();
                 opt.clip_grad_norm(self.config.grad_clip_norm);
                 opt.step();
-                total_loss_sum += total_tensor.double_value(&[]);
+
+                total_loss_sum += loss_out.total as f64;
                 kp_loss_sum += loss_out.keypoint as f64;
                 n_batches += 1;
 
                 debug!(
-                    "Epoch {epoch} batch {n_batches}: total={:.4} hm={:.4} coord_l1={:.6}",
-                    total_tensor.double_value(&[]),
-                    loss_out.total,
-                    coord_loss_val,
+                    "Epoch {epoch} batch {n_batches}: loss={:.4}",
+                    loss_out.total
                 );
                 pb.inc(1);
                 cursor = end;
@@ -552,32 +528,6 @@ impl Trainer {
                 // Extract predicted keypoints from heatmaps (B4: Soft-argmax).
                 let pred_kps = heatmap_to_keypoints_soft_argmax(&output.keypoints);
 
-                // ── [DIAG] Mean-pose collapse detector: first val batch only ──
-                if cursor == 0 {
-                    // Heatmap stats: is the model producing flat heatmaps?
-                    let hm = &output.keypoints; // [B, 17, H, W]
-                    let hm_max = hm.max().double_value(&[]);
-                    let hm_min = hm.min().double_value(&[]);
-                    let hm_mean = hm.mean(Kind::Float).double_value(&[]);
-                    let hm_std = hm.std(true).double_value(&[]);
-
-                    // Predicted coords for first 3 samples
-                    let p0 = pred_kps.select(0, 0); // [17, 2]
-                    let g0 = kp_batch.select(0, 0);
-                    let p_std = pred_kps.std(true).double_value(&[]);
-
-                    info!("============ MEAN-POSE COLLAPSE DIAGNOSTIC ============");
-                    info!("Heatmap  | min={hm_min:.4} max={hm_max:.4} mean={hm_mean:.6} std={hm_std:.6}");
-                    info!("Pred STD across batch = {p_std:.6}  (< 0.01 = COLLAPSED)");
-                    info!("Sample 0 PRED joints 0..4:\n{p0:.4}");
-                    info!("Sample 0 GT   joints 0..4:\n{g0:.4}");
-                    if pred_kps.size()[0] > 1 {
-                        let p1 = pred_kps.select(0, 1);
-                        info!("Sample 1 PRED joints 0..4:\n{p1:.4}");
-                    }
-                    info!("=======================================================");
-                }
-
                 let actual_batch_size = samples.len();
                 for b in 0..actual_batch_size {
                     let pred_kp_np = extract_kp_ndarray(&pred_kps, b);
@@ -632,6 +582,62 @@ impl Trainer {
     // Phase B: Enhanced Augmentation & Precision
     // -----------------------------------------------------------------------
 
+    /// B3: Enhanced CSI data augmentation.
+    fn augment_csi_enhanced(&self, amp: &Tensor, phase: &Tensor) -> (Tensor, Tensor) {
+        let mut amp_out = amp.shallow_clone();
+        let mut phase_out = phase.shallow_clone();
+        let device = self.device;
+
+        // Decoupled RNG coins for independent augmentation selection.
+        let coin1: f64 = Tensor::rand([], (Kind::Double, Device::Cpu)).double_value(&[]);
+        let coin2: f64 = Tensor::rand([], (Kind::Double, Device::Cpu)).double_value(&[]);
+        let coin3: f64 = Tensor::rand([], (Kind::Double, Device::Cpu)).double_value(&[]);
+
+        // 1. Gaussian noise (p=0.5, σ=0.05)
+        if coin1 < 0.5 {
+            let noise_amp = Tensor::randn(amp.size().as_slice(), (Kind::Float, device)) * 0.05;
+            let noise_ph = Tensor::randn(phase.size().as_slice(), (Kind::Float, device)) * 0.05;
+            amp_out = &amp_out + &noise_amp;
+            phase_out = &phase_out + &noise_ph;
+        }
+
+        // 2. Amplitude scaling: random [0.8, 1.2] (p=0.5)
+        if coin2 < 0.5 {
+            let scale = Tensor::rand([], (Kind::Float, Device::Cpu)).double_value(&[]) * 0.4 + 0.8;
+            amp_out = &amp_out * scale;
+        }
+
+        // 3. Time-axis circular shift: ±5 frames (p=0.5)
+        // Tensor shape: [B, T*ant, sub]
+        if coin3 < 0.5 {
+            let shift = (Tensor::rand([], (Kind::Float, Device::Cpu)).double_value(&[]) * 11.0 - 5.0) as i64;
+            let size = amp_out.size();
+            let b = size[0];
+            let flat_ant = size[1];
+            let sub = size[2];
+            let t = self.config.window_frames as i64;
+            let ant = flat_ant / t;
+            
+            amp_out = amp_out.reshape([b, t, ant, sub]).roll(&[shift], &[1]).reshape([b, flat_ant, sub]);
+            phase_out = phase_out.reshape([b, t, ant, sub]).roll(&[shift], &[1]).reshape([b, flat_ant, sub]);
+        }
+
+        (amp_out, phase_out)
+    }
+
+    /// Sample Lambda from Beta distribution for Mixup.
+    fn sample_beta(&self, alpha: f64, beta: f64) -> f64 {
+        // Approximate Beta sampling via Gamma (approximation) or simple interpolation
+        // Since we don't have a full Gamma sampler in torch-rs easily accessible here,
+        // we use a simple symmetrical approximation for alpha=beta=0.4.
+        let u: f64 = Tensor::rand([], (Kind::Double, Device::Cpu)).double_value(&[]);
+        if alpha == beta && (alpha - 0.4).abs() < 1e-5 {
+            // S-curve mapping to prioritize 0.0 and 1.0 (typical for Beta(0.4, 0.4))
+            0.5 * (1.0 + (std::f64::consts::PI * (u - 0.5)).sin())
+        } else {
+            u
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------

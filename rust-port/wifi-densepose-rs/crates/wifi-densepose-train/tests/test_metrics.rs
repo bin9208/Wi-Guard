@@ -1,21 +1,21 @@
 //! Integration tests for [`wifi_densepose_train::metrics`].
 //!
-//! The metrics module is only compiled when the `tch-backend` feature is
+//! The metrics module is only compiled when the `torch-backend` feature is
 //! enabled (because it is gated in `lib.rs`).  Tests that use
-//! `EvalMetrics` are wrapped in `#[cfg(feature = "tch-backend")]`.
+//! `EvalMetrics` are wrapped in `#[cfg(feature = "torch-backend")]`.
 //!
 //! The deterministic PCK, OKS, and Hungarian assignment tests that require
-//! no tch dependency are implemented inline in the non-gated section below
+//! no torch dependency are implemented inline in the non-gated section below
 //! using hand-computed helper functions.
 //!
 //! All inputs are fixed, deterministic arrays — no `rand`, no OS entropy.
 
 // ---------------------------------------------------------------------------
-// Tests that use `EvalMetrics` (requires tch-backend because the metrics
+// Tests that use `EvalMetrics` (requires torch-backend because the metrics
 // module is feature-gated in lib.rs)
 // ---------------------------------------------------------------------------
 
-#[cfg(feature = "tch-backend")]
+#[cfg(feature = "torch-backend")]
 mod eval_metrics_tests {
     use wifi_densepose_train::metrics::EvalMetrics;
 
@@ -142,7 +142,7 @@ mod eval_metrics_tests {
 }
 
 // ---------------------------------------------------------------------------
-// Deterministic PCK computation tests (pure Rust, no tch, no feature gate)
+// Deterministic PCK computation tests (pure Rust, no torch, no feature gate)
 // ---------------------------------------------------------------------------
 
 /// Compute PCK@threshold for a (pred, gt) pair.
@@ -220,7 +220,7 @@ fn pck_monotone_with_accuracy() {
 }
 
 // ---------------------------------------------------------------------------
-// Deterministic OKS computation tests (pure Rust, no tch, no feature gate)
+// Deterministic OKS computation tests (pure Rust, no torch, no feature gate)
 // ---------------------------------------------------------------------------
 
 /// Compute OKS for a (pred, gt) pair.

@@ -9,7 +9,7 @@
 //! frequency-domain power), trains a regularised linear model via batch gradient
 //! descent, and exports calibrated `.rvf` model containers.
 //!
-//! No PyTorch / `tch` dependency is required. All linear algebra is implemented
+//! No PyTorch / `torch` dependency is required. All linear algebra is implemented
 //! inline using standard Rust math.
 //!
 //! On completion, the best model is automatically exported as `.rvf` using `RvfBuilder`.

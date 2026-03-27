@@ -137,7 +137,8 @@ function init() {
   csiCnn.tryLoadWasm(wasmBase);
 
   // Auto-connect to local sensing server WebSocket if available
-  const defaultWsUrl = 'ws://localhost:8765/ws/sensing';
+  const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const defaultWsUrl = `${proto}//${window.location.host}/ws/sensing`;
   if (wsUrlInput) wsUrlInput.value = defaultWsUrl;
   csiSimulator.connectLive(defaultWsUrl).then(ok => {
     if (ok && connectWsBtn) {
@@ -147,6 +148,10 @@ function init() {
       statusDot.classList.remove('offline');
     }
   });
+
+  // Connect to the actual pose WebSocket
+  const defaultPoseWsUrl = `${proto}//${window.location.host}/ws/pose`;
+  connectPoseWs(defaultPoseWsUrl);
 
   // Fetch and setup models
   setupModelUI();
@@ -299,11 +304,35 @@ function mainLoop(timestamp) {
 
   // --- Render Skeleton ---
   const labelMap = { dual: '듀얼 퓨전 (DUAL FUSION)', video: '비디오 전용 (VIDEO ONLY)', csi: 'CSI 전용 (CSI ONLY)' };
-  renderer.drawSkeleton(skeletonCtx, keypoints, skeletonCanvas.width, skeletonCanvas.height, {
-    minConfidence: confidenceThreshold,
-    color: mode === 'csi' ? 'amber' : 'green',
-    label: labelMap[mode]
-  });
+  
+  // Clear the skeleton context once per frame before drawing
+  skeletonCtx.clearRect(0, 0, skeletonCanvas.width, skeletonCanvas.height);
+
+  if (mode === 'csi' || mode === 'dual') {
+    if (window.serverPoses && window.serverPoses.length > 0) {
+      window.serverPoses.forEach(person => {
+        renderer.drawSkeleton(skeletonCtx, person.keypoints, skeletonCanvas.width, skeletonCanvas.height, {
+          minConfidence: confidenceThreshold,
+          color: mode === 'csi' ? 'amber' : 'green',
+          label: labelMap[mode]
+        });
+      });
+    } else if (csiSimulator.personPresence >= 0.1) {
+      // Fallback to local decode ONLY if there is presence but no server poses
+      renderer.drawSkeleton(skeletonCtx, keypoints, skeletonCanvas.width, skeletonCanvas.height, {
+        minConfidence: confidenceThreshold,
+        color: mode === 'csi' ? 'amber' : 'green',
+        label: labelMap[mode]
+      });
+    }
+  } else {
+    // Video-only mode (uses local decode)
+    renderer.drawSkeleton(skeletonCtx, keypoints, skeletonCanvas.width, skeletonCanvas.height, {
+      minConfidence: confidenceThreshold,
+      color: 'green',
+      label: labelMap[mode]
+    });
+  }
 
   // --- Render Embedding Space ---
   const embPoints = fusionEngine.getEmbeddingPoints();
@@ -513,7 +542,11 @@ function setupModelUI() {
       const prevText = loadBtn.textContent;
       loadBtn.textContent = '적용 중...';
       try {
-        const res = await fetch(`/api/v1/models/${modelId}/load`, { method: 'POST' });
+        const res = await fetch(`/api/v1/models/load`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: modelId })
+        });
         if (res.ok) {
           statusEl.innerHTML = `현재 적용된 모델: <b style="color:var(--green-glow)">${modelId}</b>`;
         } else {
@@ -542,6 +575,42 @@ function setupModelUI() {
       unloadBtn.textContent = prevText;
     });
   }
+}
+
+// === Pose WebSocket Connection ===
+function connectPoseWs(url) {
+  const ws = new WebSocket(url);
+  ws.onmessage = (evt) => {
+    try {
+      const msg = JSON.parse(evt.data);
+      // Server sends type:'pose_data' with persons at payload.pose.persons
+      // Keypoints are in pixel coords (640x480), convert to normalized [0,1]
+      let persons = null;
+      if (msg.type === 'pose_data' && msg.payload && msg.payload.pose && msg.payload.pose.persons) {
+        persons = msg.payload.pose.persons;
+      } else if (msg.type === 'pose_update' && msg.persons) {
+        persons = msg.persons;
+      }
+      if (persons && persons.length > 0) {
+        // Normalize pixel→[0,1] for the canvas renderer
+        window.serverPoses = persons.map(p => ({
+          ...p,
+          keypoints: (p.keypoints || []).map(kp => ({
+            name: kp.name,
+            confidence: kp.confidence,
+            x: kp.x > 1 ? kp.x / 640.0 : kp.x,
+            y: kp.y > 1 ? kp.y / 480.0 : kp.y,
+            z: kp.z || 0,
+          }))
+        }));
+      } else if (msg.type === 'pose_data' || msg.type === 'pose_update') {
+        window.serverPoses = [];
+      }
+    } catch (e) {}
+  };
+  ws.onclose = () => {
+    setTimeout(() => connectPoseWs(url), 2000);
+  };
 }
 
 // Boot

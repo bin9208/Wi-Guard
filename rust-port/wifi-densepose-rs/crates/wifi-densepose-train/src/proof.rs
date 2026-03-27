@@ -3,7 +3,7 @@
 //! # Proof Protocol
 //!
 //! 1. Create [`SyntheticCsiDataset`] with fixed `seed = PROOF_SEED`.
-//! 2. Initialise the model with `tch::manual_seed(MODEL_SEED)`.
+//! 2. Initialise the model with `torch::manual_seed(MODEL_SEED)`.
 //! 3. Run exactly [`N_PROOF_STEPS`] forward + backward steps.
 //! 4. Verify that the loss decreased from initial to final.
 //! 5. Compute SHA-256 of all model weight tensors in deterministic order.
@@ -22,10 +22,10 @@
 use sha2::{Digest, Sha256};
 use std::io::{Read, Write};
 use std::path::Path;
-use tch::{nn, nn::OptimizerConfig, Device, Kind, Tensor};
+use torch::{nn, nn::OptimizerConfig, Device, Kind, Tensor};
 
 use crate::config::TrainingConfig;
-use crate::dataset::{CsiDataset, SyntheticCsiDataset, SyntheticConfig};
+use crate::dataset::{SyntheticCsiDataset, SyntheticConfig};
 use crate::losses::{generate_target_heatmaps, LossWeights, WiFiDensePoseLoss};
 use crate::model::WiFiDensePoseModel;
 use crate::trainer::make_batches;
@@ -40,7 +40,7 @@ pub const N_PROOF_STEPS: usize = 50;
 /// Seed used for the synthetic proof dataset.
 pub const PROOF_SEED: u64 = 42;
 
-/// Seed passed to `tch::manual_seed` before model construction.
+/// Seed passed to `torch::manual_seed` before model construction.
 pub const MODEL_SEED: i64 = 0;
 
 /// Batch size used during the proof run.
@@ -111,7 +111,7 @@ impl ProofResult {
 /// Returns an error if the model or optimiser cannot be constructed.
 pub fn run_proof(proof_dir: &Path) -> Result<ProofResult, Box<dyn std::error::Error>> {
     // Fixed seeds for determinism.
-    tch::manual_seed(MODEL_SEED);
+    torch::manual_seed(MODEL_SEED);
 
     let cfg = proof_config();
     let device = Device::Cpu;
@@ -153,10 +153,16 @@ pub fn run_proof(proof_dir: &Path) -> Result<ProofResult, Box<dyn std::error::Er
         let num_kp = kp.size()[1] as usize;
         let hm_size = cfg.heatmap_size;
 
-        let kp_vec: Vec<f32> = Vec::<f64>::from(kp.to_kind(Kind::Double).flatten(0, -1))
-            .iter().map(|&x| x as f32).collect();
-        let vis_vec: Vec<f32> = Vec::<f64>::from(vis.to_kind(Kind::Double).flatten(0, -1))
-            .iter().map(|&x| x as f32).collect();
+        let kp_vec: Vec<f32> = kp
+            .to_kind(Kind::Float)
+            .flatten(0, -1)
+            .try_into()
+            .expect("kp tensor to vec");
+        let vis_vec: Vec<f32> = vis
+            .to_kind(Kind::Float)
+            .flatten(0, -1)
+            .try_into()
+            .expect("vis tensor to vec");
 
         let kp_nd = ndarray::Array3::from_shape_vec((b, num_kp, 2), kp_vec)?;
         let vis_nd = ndarray::Array2::from_shape_vec((b, num_kp), vis_vec)?;
@@ -249,7 +255,7 @@ pub fn hash_model_weights(model: &WiFiDensePoseModel) -> String {
 
         // Serialise tensor values as little-endian f32.
         let flat: Tensor = tensor.flatten(0, -1).to_kind(Kind::Float).to_device(Device::Cpu);
-        let values: Vec<f32> = Vec::<f32>::from(&flat);
+        let values: Vec<f32> = (&flat).try_into().expect("tensor to vec");
         let mut buf = vec![0u8; values.len() * 4];
         for (i, v) in values.iter().enumerate() {
             let bytes = v.to_le_bytes();
@@ -402,7 +408,7 @@ mod tests {
 
     #[test]
     fn hash_model_weights_is_deterministic() {
-        tch::manual_seed(MODEL_SEED);
+        torch::manual_seed(MODEL_SEED);
         let cfg = proof_config();
         let device = Device::Cpu;
 
@@ -414,7 +420,7 @@ mod tests {
         );
         let _ = m1.forward_inference(&dummy, &dummy);
 
-        tch::manual_seed(MODEL_SEED);
+        torch::manual_seed(MODEL_SEED);
         let m2 = WiFiDensePoseModel::new(&cfg, device);
         let _ = m2.forward_inference(&dummy, &dummy);
 

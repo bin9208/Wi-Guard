@@ -14,11 +14,11 @@ readme = "README.md"
 [features]
 default = ["onnx"]
 onnx = ["ort"]
-tch-backend = ["tch"]
+torch-backend = ["dep:torch"]
 candle-backend = ["candle-core", "candle-nn"]
-cuda = ["onnx"]
+cuda = ["torch-backend"]
 tensorrt = ["onnx"]
-all-backends = ["onnx", "tch-backend", "candle-backend"]
+all-backends = ["onnx", "torch-backend", "candle-backend"]
 
 [dependencies]
 # Core utilities
@@ -36,7 +36,8 @@ num-traits.workspace = true
 ort = { workspace = true, optional = true }
 
 # PyTorch backend (optional)
-tch = { workspace = true, optional = true }
+# PyTorch backend (optional)
+torch = { package = "tch", version = "0.18.1", optional = true }
 
 # Candle backend (optional)
 candle-core = { workspace = true, optional = true }

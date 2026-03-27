@@ -1,25 +1,22 @@
-//! Virtual Domain Augmentation for cross-environment generalization (ADR-027 Phase 4).
+//! Physics-based CSI Data Augmentation for WiFi pose estimation.
 //!
-//! Generates synthetic "virtual domains" simulating different physical environments
-//! and applies domain-specific transformations to CSI amplitude frames for the
-//! MERIDIAN adversarial training loop.
+//! Contains two layers:
+//! - [`Xorshift64`]: lightweight PRNG, always available (no torch dependency).
+//! - [`CsiAugmentor`]: GPU tensor augmentation, requires `torch-backend` feature.
 //!
-//! ```rust
-//! use wifi_densepose_train::virtual_aug::{VirtualDomainAugmentor, Xorshift64};
+//! When `torch-backend` is enabled, [`CsiAugmentor`] operates directly on GPU
+//! tensors in batch — no per-sample CPU loops. All augmentations model
+//! real-world WiFi signal phenomena.
 //!
-//! let mut aug = VirtualDomainAugmentor::default();
-//! let mut rng = Xorshift64::new(42);
-//! let frame = vec![0.5_f32; 56];
-//! let domain = aug.generate_domain(&mut rng);
-//! let out = aug.augment_frame(&frame, &domain);
-//! assert_eq!(out.len(), frame.len());
-//! ```
+//! Input tensors: `amp [B, T*ant, sub]`, `phase [B, T*ant, sub]`
+//! where `T*ant = 300` (100 frames × 3 antennas), `sub = 56`.
+//!
+//! The 300-row dimension is interleaved as:
+//! `[t0_a0, t0_a1, t0_a2, t1_a0, t1_a1, t1_a2, ..., t99_a0, t99_a1, t99_a2]`
 
-use std::f32::consts::PI;
-
-// ---------------------------------------------------------------------------
-// Xorshift64 PRNG (matches dataset.rs pattern)
-// ---------------------------------------------------------------------------
+// =========================================================================
+// Xorshift64 PRNG — always available (no torch dependency)
+// =========================================================================
 
 /// Lightweight 64-bit Xorshift PRNG for deterministic augmentation.
 pub struct Xorshift64 {
@@ -65,211 +62,399 @@ impl Xorshift64 {
     pub fn next_gaussian(&mut self) -> f32 {
         let u1 = self.next_f32().max(1e-10);
         let u2 = self.next_f32();
-        (-2.0 * u1.ln()).sqrt() * (2.0 * PI * u2).cos()
+        (-2.0 * u1.ln()).sqrt() * (2.0 * std::f32::consts::PI * u2).cos()
     }
 }
 
-// ---------------------------------------------------------------------------
-// VirtualDomain
-// ---------------------------------------------------------------------------
+// =========================================================================
+// CsiAugmentor — GPU tensor augmentation (requires torch-backend)
+// =========================================================================
 
-/// Describes a single synthetic WiFi environment for domain augmentation.
-#[derive(Debug, Clone)]
-pub struct VirtualDomain {
-    /// Path-loss factor simulating room size (< 1 smaller, > 1 larger room).
-    pub room_scale: f32,
-    /// Wall reflection coefficient in `[0, 1]` (low = absorptive, high = reflective).
-    pub reflection_coeff: f32,
-    /// Number of virtual scatterers (furniture / obstacles).
-    pub n_scatterers: usize,
-    /// Standard deviation of additive hardware noise.
-    pub noise_std: f32,
-    /// Unique label for the domain classifier in adversarial training.
-    pub domain_id: u32,
-}
+#[cfg(feature = "torch-backend")]
+use torch::{Device, Kind, Tensor};
 
-// ---------------------------------------------------------------------------
-// VirtualDomainAugmentor
-// ---------------------------------------------------------------------------
-
-/// Samples virtual WiFi domains and transforms CSI frames to simulate them.
+/// Physics-based CSI augmentation pipeline for WiFi pose estimation training.
 ///
-/// Applies four transformations: room-scale amplitude scaling, per-subcarrier
-/// reflection modulation, virtual scatterer sinusoidal interference, and
-/// Gaussian noise injection.
-#[derive(Debug, Clone)]
-pub struct VirtualDomainAugmentor {
-    /// Range for room scale factor `(min, max)`.
-    pub room_scale_range: (f32, f32),
-    /// Range for reflection coefficient `(min, max)`.
-    pub reflection_coeff_range: (f32, f32),
-    /// Range for number of virtual scatterers `(min, max)`.
-    pub n_virtual_scatterers: (usize, usize),
-    /// Range for noise standard deviation `(min, max)`.
-    pub noise_std_range: (f32, f32),
-    next_domain_id: u32,
+/// All transforms run on the same device as the input tensors (GPU or CPU)
+/// and operate on the full batch simultaneously.
+#[cfg(feature = "torch-backend")]
+pub struct CsiAugmentor {
+    /// Number of antenna streams (tx × rx). Default: 3.
+    n_ant: i64,
+    /// Number of time frames per window. Default: 100.
+    n_time: i64,
+    /// Number of subcarriers. Default: 56.
+    n_sub: i64,
+    /// Device for random tensor generation (must match input tensors).
+    device: Device,
 }
 
-impl Default for VirtualDomainAugmentor {
-    fn default() -> Self {
-        Self {
-            room_scale_range: (0.5, 2.0),
-            reflection_coeff_range: (0.3, 0.9),
-            n_virtual_scatterers: (0, 5),
-            noise_std_range: (0.01, 0.1),
-            next_domain_id: 0,
-        }
-    }
-}
-
-impl VirtualDomainAugmentor {
-    /// Randomly sample a new [`VirtualDomain`] from the configured ranges.
-    pub fn generate_domain(&mut self, rng: &mut Xorshift64) -> VirtualDomain {
-        let id = self.next_domain_id;
-        self.next_domain_id = self.next_domain_id.wrapping_add(1);
-        VirtualDomain {
-            room_scale: rng.next_f32_range(self.room_scale_range.0, self.room_scale_range.1),
-            reflection_coeff: rng.next_f32_range(self.reflection_coeff_range.0, self.reflection_coeff_range.1),
-            n_scatterers: rng.next_usize_range(self.n_virtual_scatterers.0, self.n_virtual_scatterers.1),
-            noise_std: rng.next_f32_range(self.noise_std_range.0, self.noise_std_range.1),
-            domain_id: id,
-        }
+#[cfg(feature = "torch-backend")]
+impl CsiAugmentor {
+    /// Create a new augmentor matching the dataset geometry.
+    pub fn new(n_ant: i64, n_time: i64, n_sub: i64, device: Device) -> Self {
+        Self { n_ant, n_time, n_sub, device }
     }
 
-    /// Transform a single CSI amplitude frame to simulate `domain`.
+    /// Apply the full augmentation pipeline to a training batch.
     ///
-    /// Pipeline: (1) scale by `1/room_scale`, (2) per-subcarrier reflection
-    /// modulation, (3) scatterer sinusoidal perturbation, (4) Gaussian noise.
-    pub fn augment_frame(&self, frame: &[f32], domain: &VirtualDomain) -> Vec<f32> {
-        let n = frame.len();
-        let n_f = n as f32;
-        let mut noise_rng = Xorshift64::new(
-            (domain.domain_id as u64).wrapping_mul(0x9E3779B97F4A7C15).wrapping_add(1),
+    /// Each transform is applied independently with its own probability.
+    /// The pipeline order is chosen so later transforms don't undo earlier ones:
+    ///
+    /// 1. Amplitude jitter (global scale per sample)
+    /// 2. Phase drift (per-antenna constant offset)
+    /// 3. Gaussian noise (additive)
+    /// 4. Subcarrier band masking (frequency dropout)
+    /// 5. Temporal masking (time-frame dropout)
+    /// 6. Antenna dropout (full antenna channel zero-out)
+    pub fn augment(
+        &self,
+        amp: &Tensor,   // [B, T*ant, sub]
+        phase: &Tensor, // [B, T*ant, sub]
+    ) -> (Tensor, Tensor) {
+        let mut a = amp.shallow_clone();
+        let mut p = phase.shallow_clone();
+
+        // 1. Amplitude jitter: ×[0.7, 1.3] per sample  (p=0.5)
+        //    Simulates varying transmitter–receiver distance / path-loss.
+        a = self.amplitude_jitter(&a, 0.5, 0.7, 1.3);
+
+        // 2. Phase drift: per-antenna random constant offset  (p=0.5)
+        //    Simulates local-oscillator phase offset between antennas.
+        p = self.phase_drift(&p, 0.5);
+
+        // 3. Gaussian noise  (p=0.6, σ_amp=0.03, σ_phase=0.02)
+        //    Simulates receiver thermal noise / quantisation noise.
+        let (a2, p2) = self.gaussian_noise(&a, &p, 0.6, 0.03, 0.02);
+        a = a2;
+        p = p2;
+
+        // 4. Subcarrier band masking  (p=0.5, width 1–8)
+        //    Simulates frequency-selective deep fading.
+        a = self.subcarrier_mask(&a, 0.5, 1, 8);
+        p = self.subcarrier_mask(&p, 0.5, 1, 8);
+
+        // 5. Temporal masking  (p=0.5, width 1–15 frames)
+        //    Simulates transient occlusion / signal dropout.
+        let (a3, p3) = self.temporal_mask(&a, &p, 0.5, 1, 15);
+        a = a3;
+        p = p3;
+
+        // 6. Antenna dropout  (p=0.15)
+        //    Simulates antenna hardware failure / severe antenna-level fading.
+        let (a4, p4) = self.antenna_dropout(&a, &p, 0.15);
+        a = a4;
+        p = p4;
+
+        (a, p)
+    }
+
+    // -----------------------------------------------------------------------
+    // Individual transforms
+    // -----------------------------------------------------------------------
+
+    /// Per-sample amplitude scaling by a random factor in [lo, hi].
+    fn amplitude_jitter(&self, amp: &Tensor, prob: f64, lo: f64, hi: f64) -> Tensor {
+        let b = amp.size()[0];
+        // Coin flip per sample: [B]
+        let coin = Tensor::rand([b], (Kind::Float, self.device));
+        // Random scale in [lo, hi], shape [B, 1, 1] for broadcast
+        let scale = Tensor::rand([b, 1, 1], (Kind::Float, self.device)) * (hi - lo) + lo;
+        // Where coin < prob, apply scale; otherwise keep original
+        let mask = coin.lt(prob).unsqueeze(-1).unsqueeze(-1).to_kind(Kind::Float);
+        let scaled = amp * &scale;
+        // mask * scaled + (1 - mask) * amp
+        &scaled * &mask + amp * (Tensor::ones_like(&mask) - &mask)
+    }
+
+    /// Per-antenna random phase offset (LO drift simulation).
+    ///
+    /// Adds a constant offset ∈ [-0.3, 0.3] (in normalised phase units, ≈ [-54°, 54°])
+    /// to each antenna stream independently.
+    fn phase_drift(&self, phase: &Tensor, prob: f64) -> Tensor {
+        let b = phase.size()[0];
+        let coin: f64 = Tensor::rand([], (Kind::Float, Device::Cpu)).double_value(&[]);
+        if coin >= prob {
+            return phase.shallow_clone();
+        }
+        // Generate per-antenna offsets: [B, ant]
+        let offsets = Tensor::rand([b, self.n_ant], (Kind::Float, self.device)) * 0.6 - 0.3;
+        // Expand to [B, T*ant, 1]: repeat each antenna offset T times
+        // offsets [B, ant] → [B, 1, ant] → repeat [B, T, ant] → reshape [B, T*ant] → unsqueeze
+        let offsets = offsets
+            .unsqueeze(1)
+            .expand([b, self.n_time, self.n_ant], false)
+            .contiguous()
+            .reshape([b, self.n_time * self.n_ant])
+            .unsqueeze(-1); // [B, T*ant, 1]
+        phase + offsets
+    }
+
+    /// Additive Gaussian noise on both amplitude and phase.
+    fn gaussian_noise(
+        &self,
+        amp: &Tensor,
+        phase: &Tensor,
+        prob: f64,
+        sigma_amp: f64,
+        sigma_phase: f64,
+    ) -> (Tensor, Tensor) {
+        let coin: f64 = Tensor::rand([], (Kind::Float, Device::Cpu)).double_value(&[]);
+        if coin >= prob {
+            return (amp.shallow_clone(), phase.shallow_clone());
+        }
+        let noise_a = Tensor::randn(amp.size().as_slice(), (Kind::Float, self.device)) * sigma_amp;
+        let noise_p = Tensor::randn(phase.size().as_slice(), (Kind::Float, self.device)) * sigma_phase;
+        (amp + noise_a, phase + noise_p)
+    }
+
+    /// Zero out a random contiguous band of subcarriers (SpecAugment-style).
+    ///
+    /// Width is uniform in [min_w, max_w]. The same band is masked for every
+    /// sample in the batch (simulates environment-level frequency fading).
+    fn subcarrier_mask(&self, x: &Tensor, prob: f64, min_w: i64, max_w: i64) -> Tensor {
+        let coin: f64 = Tensor::rand([], (Kind::Float, Device::Cpu)).double_value(&[]);
+        if coin >= prob {
+            return x.shallow_clone();
+        }
+        let w = Tensor::randint_low(min_w, max_w + 1, [], (Kind::Int64, Device::Cpu))
+            .int64_value(&[]);
+        let max_start = (self.n_sub - w).max(0);
+        let start = if max_start > 0 {
+            Tensor::randint(max_start, [], (Kind::Int64, Device::Cpu)).int64_value(&[])
+        } else {
+            0
+        };
+
+        // Build mask: ones everywhere except the masked band
+        let mut mask = Tensor::ones([1, 1, self.n_sub], (Kind::Float, self.device));
+        if w > 0 {
+            let _ = mask.narrow(2, start, w).fill_(0.0);
+        }
+        x * mask // broadcast [1,1,sub] over [B, T*ant, sub]
+    }
+
+    /// Zero out contiguous time frames (all antennas for those frames).
+    ///
+    /// Width is uniform in [min_w, max_w] frames. Affects all antennas
+    /// for the selected frames, preserving inter-antenna consistency.
+    fn temporal_mask(
+        &self,
+        amp: &Tensor,
+        phase: &Tensor,
+        prob: f64,
+        min_w: i64,
+        max_w: i64,
+    ) -> (Tensor, Tensor) {
+        let coin: f64 = Tensor::rand([], (Kind::Float, Device::Cpu)).double_value(&[]);
+        if coin >= prob {
+            return (amp.shallow_clone(), phase.shallow_clone());
+        }
+        let b = amp.size()[0];
+        let flat = self.n_time * self.n_ant;
+
+        let w_frames = Tensor::randint_low(min_w, max_w + 1, [], (Kind::Int64, Device::Cpu))
+            .int64_value(&[]);
+        let max_start = (self.n_time - w_frames).max(0);
+        let start_frame = if max_start > 0 {
+            Tensor::randint(max_start, [], (Kind::Int64, Device::Cpu)).int64_value(&[])
+        } else {
+            0
+        };
+
+        // Build mask in [1, T, ant, 1] then reshape to [1, T*ant, 1]
+        let mut mask_4d = Tensor::ones(
+            [1, self.n_time, self.n_ant, 1],
+            (Kind::Float, self.device),
         );
-        let mut out = Vec::with_capacity(n);
-        for (k, &val) in frame.iter().enumerate() {
-            let k_f = k as f32;
-            // 1. Room-scale amplitude attenuation (guard against zero scale)
-            let scaled = if domain.room_scale.abs() < 1e-10 { val } else { val / domain.room_scale };
-            // 2. Reflection coefficient modulation (per-subcarrier)
-            let refl = domain.reflection_coeff
-                + (1.0 - domain.reflection_coeff) * (PI * k_f / n_f).cos();
-            let modulated = scaled * refl;
-            // 3. Virtual scatterer sinusoidal interference
-            let mut scatter = 0.0_f32;
-            for s in 0..domain.n_scatterers {
-                scatter += 0.05 * (2.0 * PI * (s as f32 + 1.0) * k_f / n_f).sin();
-            }
-            // 4. Additive Gaussian noise
-            out.push(modulated + scatter + noise_rng.next_gaussian() * domain.noise_std);
+        if w_frames > 0 {
+            let _ = mask_4d.narrow(1, start_frame, w_frames).fill_(0.0);
         }
-        out
+        let mask = mask_4d.reshape([1, flat, 1]); // broadcast over [B, T*ant, sub]
+
+        (amp * &mask, phase * &mask)
     }
 
-    /// Augment a batch, producing `k` virtual-domain variants per input frame.
+    /// Zero out one entire antenna stream across all time frames.
     ///
-    /// Returns `(augmented_frame, domain_id)` pairs; total = `batch.len() * k`.
-    pub fn augment_batch(
-        &mut self, batch: &[Vec<f32>], k: usize, rng: &mut Xorshift64,
-    ) -> Vec<(Vec<f32>, u32)> {
-        let mut results = Vec::with_capacity(batch.len() * k);
-        for frame in batch {
-            for _ in 0..k {
-                let domain = self.generate_domain(rng);
-                let augmented = self.augment_frame(frame, &domain);
-                results.push((augmented, domain.domain_id));
-            }
+    /// Simulates antenna hardware failure or severe per-antenna fading.
+    /// At most one antenna is dropped per batch to avoid information loss.
+    fn antenna_dropout(
+        &self,
+        amp: &Tensor,
+        phase: &Tensor,
+        prob: f64,
+    ) -> (Tensor, Tensor) {
+        let coin: f64 = Tensor::rand([], (Kind::Float, Device::Cpu)).double_value(&[]);
+        if coin >= prob {
+            return (amp.shallow_clone(), phase.shallow_clone());
         }
-        results
+        let flat = self.n_time * self.n_ant;
+        // Pick which antenna to drop: 0, 1, or 2
+        let drop_ant = Tensor::randint(self.n_ant, [], (Kind::Int64, Device::Cpu))
+            .int64_value(&[]);
+
+        // Build mask in [1, T, ant, 1]
+        let mut mask_4d = Tensor::ones(
+            [1, self.n_time, self.n_ant, 1],
+            (Kind::Float, self.device),
+        );
+        // Zero out the selected antenna across all time steps
+        // mask_4d[:, :, drop_ant, :] = 0
+        let _ = mask_4d
+            .narrow(2, drop_ant, 1)
+            .fill_(0.0);
+        let mask = mask_4d.reshape([1, flat, 1]);
+
+        (amp * &mask, phase * &mask)
     }
 }
+
+/// Legacy type alias for backward compatibility.
+#[cfg(feature = "torch-backend")]
+pub type VirtualDomainAugmentor = CsiAugmentor;
 
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
 #[cfg(test)]
+#[cfg(feature = "torch-backend")]
 mod tests {
     use super::*;
 
-    fn make_domain(scale: f32, coeff: f32, scatter: usize, noise: f32, id: u32) -> VirtualDomain {
-        VirtualDomain { room_scale: scale, reflection_coeff: coeff, n_scatterers: scatter, noise_std: noise, domain_id: id }
+    fn device() -> Device { Device::Cpu }
+
+    fn make_augmentor() -> CsiAugmentor {
+        CsiAugmentor::new(3, 100, 56, device())
+    }
+
+    fn dummy_batch(b: i64) -> (Tensor, Tensor) {
+        let amp = Tensor::rand([b, 300, 56], (Kind::Float, device()));
+        let phase = Tensor::rand([b, 300, 56], (Kind::Float, device())) * 2.0 - 1.0;
+        (amp, phase)
     }
 
     #[test]
-    fn domain_within_configured_ranges() {
-        let mut aug = VirtualDomainAugmentor::default();
-        let mut rng = Xorshift64::new(12345);
-        for _ in 0..100 {
-            let d = aug.generate_domain(&mut rng);
-            assert!(d.room_scale >= 0.5 && d.room_scale <= 2.0);
-            assert!(d.reflection_coeff >= 0.3 && d.reflection_coeff <= 0.9);
-            assert!(d.n_scatterers <= 5);
-            assert!(d.noise_std >= 0.01 && d.noise_std <= 0.1);
-        }
+    fn augment_preserves_shape() {
+        let aug = make_augmentor();
+        let (amp, phase) = dummy_batch(4);
+        let (a_out, p_out) = aug.augment(&amp, &phase);
+        assert_eq!(a_out.size(), vec![4, 300, 56]);
+        assert_eq!(p_out.size(), vec![4, 300, 56]);
     }
 
     #[test]
-    fn augment_frame_preserves_length() {
-        let aug = VirtualDomainAugmentor::default();
-        let out = aug.augment_frame(&vec![0.5; 56], &make_domain(1.0, 0.5, 3, 0.05, 0));
-        assert_eq!(out.len(), 56);
+    fn augment_produces_finite_values() {
+        let aug = make_augmentor();
+        let (amp, phase) = dummy_batch(8);
+        let (a_out, p_out) = aug.augment(&amp, &phase);
+        assert!(a_out.isfinite().all().int64_value(&[]) == 1, "amp must be finite");
+        assert!(p_out.isfinite().all().int64_value(&[]) == 1, "phase must be finite");
     }
 
     #[test]
-    fn augment_frame_identity_domain_approx_input() {
-        let aug = VirtualDomainAugmentor::default();
-        let frame: Vec<f32> = (0..56).map(|i| 0.3 + 0.01 * i as f32).collect();
-        let out = aug.augment_frame(&frame, &make_domain(1.0, 1.0, 0, 0.0, 0));
-        for (a, b) in out.iter().zip(frame.iter()) {
-            assert!((a - b).abs() < 1e-5, "identity domain: got {a}, expected {b}");
-        }
-    }
-
-    #[test]
-    fn augment_batch_produces_correct_count() {
-        let mut aug = VirtualDomainAugmentor::default();
-        let mut rng = Xorshift64::new(99);
-        let batch: Vec<Vec<f32>> = (0..4).map(|_| vec![0.5; 56]).collect();
-        let results = aug.augment_batch(&batch, 3, &mut rng);
-        assert_eq!(results.len(), 12);
-        for (f, _) in &results { assert_eq!(f.len(), 56); }
-    }
-
-    #[test]
-    fn different_seeds_produce_different_augmentations() {
-        let mut aug1 = VirtualDomainAugmentor::default();
-        let mut aug2 = VirtualDomainAugmentor::default();
-        let frame = vec![0.5_f32; 56];
-        let d1 = aug1.generate_domain(&mut Xorshift64::new(1));
-        let d2 = aug2.generate_domain(&mut Xorshift64::new(2));
-        let out1 = aug1.augment_frame(&frame, &d1);
-        let out2 = aug2.augment_frame(&frame, &d2);
-        assert!(out1.iter().zip(out2.iter()).any(|(a, b)| (a - b).abs() > 1e-6));
-    }
-
-    #[test]
-    fn deterministic_same_seed_same_output() {
-        let batch: Vec<Vec<f32>> = (0..3).map(|i| vec![0.1 * i as f32; 56]).collect();
-        let mut aug1 = VirtualDomainAugmentor::default();
-        let mut aug2 = VirtualDomainAugmentor::default();
-        let res1 = aug1.augment_batch(&batch, 2, &mut Xorshift64::new(42));
-        let res2 = aug2.augment_batch(&batch, 2, &mut Xorshift64::new(42));
-        assert_eq!(res1.len(), res2.len());
-        for ((f1, id1), (f2, id2)) in res1.iter().zip(res2.iter()) {
-            assert_eq!(id1, id2);
-            for (a, b) in f1.iter().zip(f2.iter()) {
-                assert!((a - b).abs() < 1e-7, "same seed must produce identical output");
+    fn subcarrier_mask_zeroes_band() {
+        let aug = make_augmentor();
+        let x = Tensor::ones([2, 300, 56], (Kind::Float, device()));
+        // Run many times; at least one should have zeros
+        let mut found_zeros = false;
+        for _ in 0..20 {
+            let out = aug.subcarrier_mask(&x, 1.0, 4, 8);
+            let min_val = out.min().double_value(&[]);
+            if min_val < 0.5 {
+                found_zeros = true;
+                break;
             }
         }
+        assert!(found_zeros, "subcarrier mask should zero out some subcarriers");
     }
 
     #[test]
-    fn domain_ids_are_sequential() {
-        let mut aug = VirtualDomainAugmentor::default();
-        let mut rng = Xorshift64::new(7);
-        for i in 0..10_u32 { assert_eq!(aug.generate_domain(&mut rng).domain_id, i); }
+    fn temporal_mask_zeroes_frames() {
+        let aug = make_augmentor();
+        let amp = Tensor::ones([2, 300, 56], (Kind::Float, device()));
+        let phase = Tensor::ones([2, 300, 56], (Kind::Float, device()));
+        let mut found_zeros = false;
+        for _ in 0..20 {
+            let (a_out, _) = aug.temporal_mask(&amp, &phase, 1.0, 5, 15);
+            let min_val = a_out.min().double_value(&[]);
+            if min_val < 0.5 {
+                found_zeros = true;
+                break;
+            }
+        }
+        assert!(found_zeros, "temporal mask should zero out some frames");
     }
+
+    #[test]
+    fn antenna_dropout_zeroes_one_antenna() {
+        let aug = make_augmentor();
+        let amp = Tensor::ones([2, 300, 56], (Kind::Float, device()));
+        let phase = Tensor::ones([2, 300, 56], (Kind::Float, device()));
+        let (a_out, _) = aug.antenna_dropout(&amp, &phase, 1.0); // force apply
+        // Reshape to [2, 100, 3, 56] and check exactly one antenna is zeroed
+        let reshaped = a_out.reshape([2, 100, 3, 56]);
+        let per_ant_sum = reshaped.sum_dim_intlist([1_i64, 3].as_slice(), false, Kind::Float);
+        // per_ant_sum: [2, 3] — one of the 3 should be 0
+        let min_per_sample = per_ant_sum.min_dim(1, false).0;
+        for i in 0..2 {
+            assert!(
+                min_per_sample.double_value(&[i]) < 1e-6,
+                "one antenna should be fully zeroed"
+            );
+        }
+    }
+
+    #[test]
+    fn amplitude_jitter_changes_values() {
+        let aug = make_augmentor();
+        let amp = Tensor::ones([4, 300, 56], (Kind::Float, device()));
+        let mut different = false;
+        for _ in 0..10 {
+            let out = aug.amplitude_jitter(&amp, 1.0, 0.7, 1.3);
+            let diff = (&out - &amp).abs().sum(Kind::Float).double_value(&[]);
+            if diff > 1e-3 {
+                different = true;
+                break;
+            }
+        }
+        assert!(different, "amplitude jitter should modify values");
+    }
+
+    #[test]
+    fn phase_drift_adds_per_antenna_offset() {
+        let aug = make_augmentor();
+        let phase = Tensor::zeros([2, 300, 56], (Kind::Float, device()));
+        let out = aug.phase_drift(&phase, 1.0); // force apply
+        // Reshape to [2, 100, 3, 56]
+        let reshaped = out.reshape([2, 100, 3, 56]);
+        // Each antenna should have a constant offset across time and subcarriers
+        // Check that within one antenna, the std across time is very low
+        let ant0 = reshaped.select(2, 0); // [2, 100, 56]
+        let ant0_std = ant0.std(true).double_value(&[]);
+        // Since input was 0 and we add a constant per antenna, std should be ~0
+        // (or very small from the per-sample variation)
+        assert!(ant0_std < 0.4, "per-antenna offset should be roughly constant, got std={ant0_std}");
+    }
+
+    #[test]
+    fn gaussian_noise_increases_variance() {
+        let aug = make_augmentor();
+        let amp = Tensor::ones([4, 300, 56], (Kind::Float, device()));
+        let phase = Tensor::zeros([4, 300, 56], (Kind::Float, device()));
+        let (a_out, p_out) = aug.gaussian_noise(&amp, &phase, 1.0, 0.03, 0.02);
+        let amp_std = a_out.std(true).double_value(&[]);
+        let ph_std = p_out.std(true).double_value(&[]);
+        assert!(amp_std > 0.01, "noise should increase amp variance, got {amp_std}");
+        assert!(ph_std > 0.005, "noise should increase phase variance, got {ph_std}");
+    }
+
+}
+
+#[cfg(test)]
+mod tests_rng {
+    use super::*;
 
     #[test]
     fn xorshift64_deterministic() {
@@ -285,13 +470,5 @@ mod tests {
             let v = rng.next_f32();
             assert!(v >= 0.0 && v < 1.0, "f32 sample {v} not in [0, 1)");
         }
-    }
-
-    #[test]
-    fn augment_frame_empty_and_batch_k_zero() {
-        let aug = VirtualDomainAugmentor::default();
-        assert!(aug.augment_frame(&[], &make_domain(1.5, 0.5, 2, 0.05, 0)).is_empty());
-        let mut aug2 = VirtualDomainAugmentor::default();
-        assert!(aug2.augment_batch(&[vec![0.5; 56]], 0, &mut Xorshift64::new(1)).is_empty());
     }
 }

@@ -48,6 +48,20 @@ export class CanvasRenderer {
 
     if (!keypoints || keypoints.length === 0) return;
 
+    // Inject a synthetic neck keypoint for COCO 17-point if it's missing index 25
+    if (keypoints.length === 17 && !keypoints[25]) {
+      const ls = keypoints[5];
+      const rs = keypoints[6];
+      if (ls && rs) {
+        keypoints[25] = {
+          name: 'neck',
+          x: (ls.x + rs.x) / 2,
+          y: (ls.y + rs.y) / 2 - 0.02, // slightly above shoulders
+          confidence: Math.min(ls.confidence, rs.confidence)
+        };
+      }
+    }
+
     // Draw limbs first (behind joints)
     ctx.lineCap = 'round';
 

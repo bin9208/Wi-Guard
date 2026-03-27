@@ -3,7 +3,8 @@
 
 export class WebSocketClient {
   constructor(options = {}) {
-    this.url = options.url || 'ws://localhost:8000/ws/pose';
+    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    this.url = options.url || `${proto}//${window.location.host}/ws/pose`;
     this.ws = null;
     this.state = 'disconnected'; // disconnected, connecting, connected, error
     this.isRealData = false;

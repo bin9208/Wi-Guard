@@ -1,0 +1,883 @@
+       Fresh unicode-ident v1.0.24
+       Fresh cfg-if v1.0.4
+       Fresh version_check v0.9.5
+       Fresh autocfg v1.5.0
+       Fresh shlex v1.3.0
+       Fresh find-msvc-tools v0.1.9
+       Fresh pkg-config v0.3.32
+       Fresh once_cell v1.21.3
+       Fresh rawpointer v0.2.1
+       Fresh smallvec v1.15.1
+       Fresh scopeguard v1.2.0
+       Fresh proc-macro2 v1.0.106
+       Fresh getrandom v0.2.17
+       Fresh tracing-core v0.1.36
+       Fresh lock_api v0.4.14
+       Fresh equivalent v1.0.2
+       Fresh subtle v2.6.1
+       Fresh zeroize v1.8.2
+       Fresh pin-project-lite v0.2.17
+       Fresh windows-link v0.2.1
+       Fresh quote v1.0.44
+       Fresh serde_core v1.0.228
+       Fresh libm v0.2.16
+       Fresh getrandom v0.3.4
+       Fresh typenum v1.19.0
+       Fresh crossbeam-utils v0.8.21
+       Fresh parking_lot_core v0.9.12
+       Fresh zmij v1.0.21
+       Fresh libc v0.2.182
+       Fresh windows-sys v0.61.2
+       Fresh cpufeatures v0.2.17
+       Fresh hashbrown v0.16.1
+       Fresh bytemuck v1.25.0
+       Fresh itoa v1.0.17
+       Fresh rand_core v0.6.4
+warning: httparse@1.10.1: building for no_std disables httparse SIMD
+       Fresh syn v2.0.117
+       Fresh jobserver v0.1.34
+       Fresh num-traits v0.2.19
+       Fresh generic-array v0.14.7
+       Fresh matrixmultiply v0.3.10
+       Fresh serde_json v1.0.149
+       Fresh httparse v1.10.1
+       Fresh schannel v0.1.28
+       Fresh http v1.4.0
+       Fresh crossbeam-epoch v0.9.18
+       Fresh winapi v0.3.9
+       Fresh rustls-pki-types v1.14.0
+       Fresh pem-rfc7468 v0.7.0
+       Fresh base64 v0.22.1
+       Fresh byteorder v1.5.0
+       Fresh hashbrown v0.14.5
+       Fresh parking_lot v0.12.5
+       Fresh cc v1.2.56
+       Fresh serde_derive v1.0.228
+       Fresh num-integer v0.1.46
+       Fresh num-complex v0.4.6
+       Fresh zerocopy-derive v0.8.40
+       Fresh crypto-common v0.1.7
+       Fresh block-buffer v0.10.4
+       Fresh thiserror-impl v1.0.69
+       Fresh tracing-attributes v0.1.31
+       Fresh ptr_meta_derive v0.3.1
+       Fresh thiserror-impl v2.0.18
+       Fresh dashmap v6.1.0
+       Fresh socks v0.3.4
+       Fresh der v0.7.10
+       Fresh ureq-proto v0.5.3
+       Fresh native-tls v0.2.18
+       Fresh crossbeam-deque v0.8.6
+       Fresh bytecheck_derive v0.8.2
+       Fresh webpki-root-certs v1.0.6
+       Fresh adler2 v2.0.1
+       Fresh utf-8 v0.7.6
+       Fresh simd-adler32 v0.3.8
+       Fresh serde v1.0.228
+       Fresh zerocopy v0.8.40
+       Fresh digest v0.10.7
+       Fresh ptr_meta v0.3.1
+       Fresh thiserror v1.0.69
+       Fresh tracing v0.1.44
+       Fresh thiserror v2.0.18
+       Fresh percent-encoding v2.3.2
+       Fresh memchr v2.8.0
+       Fresh simdutf8 v0.1.5
+       Fresh windows_x86_64_msvc v0.53.1
+       Fresh getrandom v0.4.1
+       Fresh miniz_oxide v0.8.9
+       Fresh munge_macro v0.4.7
+       Fresh crc32fast v1.5.0
+       Fresh safe_arch v0.7.4
+       Fresh indexmap v2.13.0
+       Fresh virtue v0.0.18
+       Fresh allocator-api2 v0.2.21
+       Fresh foldhash v0.1.5
+       Fresh lzma-rust2 v0.15.7
+       Fresh hmac-sha256 v1.1.14
+       Fresh ppv-lite86 v0.2.21
+       Fresh rancor v0.1.1
+       Fresh sha2 v0.10.9
+       Fresh ndarray v0.16.1
+       Fresh ureq v3.2.0
+       Fresh anyhow v1.0.102
+       Fresh hashbrown v0.15.5
+       Fresh bincode_derive v2.0.1
+       Fresh ndarray v0.15.6
+       Fresh rayon-core v1.13.0
+       Fresh uuid v1.21.0
+       Fresh flate2 v1.1.9
+       Fresh windows-targets v0.53.5
+       Fresh munge v0.4.7
+       Fresh wide v0.7.33
+       Fresh chrono v0.4.44
+       Fresh paste v1.0.15
+       Fresh inout v0.1.4
+       Fresh rkyv_derive v0.8.15
+       Fresh approx v0.5.1
+       Fresh once_cell_polyfill v1.70.2
+       Fresh powerfmt v0.2.0
+       Fresh rand_chacha v0.3.1
+       Fresh bytecheck v0.8.2
+       Fresh windows_x86_64_msvc v0.52.6
+       Fresh zstd-sys v2.0.16+zstd.1.5.7
+       Fresh pest_meta v2.8.6
+       Fresh unty v0.0.4
+       Fresh utf8parse v0.2.2
+       Fresh base64ct v1.8.3
+       Fresh either v1.15.0
+       Fresh anstyle v1.0.13
+       Fresh lru v0.12.5
+       Fresh simba v0.9.1
+       Fresh cipher v0.4.4
+       Fresh bzip2-sys v0.1.13+1.0.8
+       Fresh deranged v0.5.8
+       Fresh windows-sys v0.60.2
+       Fresh hmac v0.12.1
+       Fresh num-rational v0.4.2
+       Fresh nalgebra-macros v0.2.2
+       Fresh crossbeam-queue v0.3.12
+       Fresh crossbeam-channel v0.5.15
+       Fresh anstyle-query v1.1.5
+       Fresh colorchoice v1.0.4
+       Fresh ucd-trie v0.1.7
+       Fresh is_terminal_polyfill v1.70.2
+       Fresh time-core v0.1.8
+       Fresh rand v0.8.5
+       Fresh rend v0.5.3
+       Fresh windows-targets v0.52.6
+       Fresh bincode v2.0.1
+       Fresh pest_generator v2.8.6
+       Fresh password-hash v0.4.2
+       Fresh rayon v1.11.0
+       Fresh zstd-safe v5.0.2+zstd.1.5.2
+       Fresh anstyle-wincon v3.0.11
+       Fresh anstyle-parse v0.2.7
+       Fresh lazy_static v1.5.0
+       Fresh strength_reduce v0.2.4
+       Fresh num-conv v0.2.0
+       Fresh regex-syntax v0.8.10
+       Fresh fixedbitset v0.4.2
+       Fresh crossbeam v0.8.4
+       Fresh midstreamer-temporal-compare v0.1.0
+       Fresh pest v2.8.6
+       Fresh aes v0.8.4
+       Fresh bzip2 v0.4.4
+       Fresh socket2 v0.6.2
+       Fresh nalgebra v0.33.2
+       Fresh serde_spanned v0.6.9
+       Fresh sha1 v0.10.6
+       Fresh toml_datetime v0.6.3
+       Fresh num-bigint v0.4.6
+       Fresh ndarray v0.17.2
+warning: ort-sys@2.0.0-rc.11: [ort-sys] [WARN] had to copy dylibs because Windows Developer Mode is not enabled, or the cache dir is on a different drive. examples & tests will not be able to access the dylibs
+       Fresh rkyv v0.8.15
+       Fresh rand_distr v0.4.3
+       Fresh pest_derive v2.8.6
+       Fresh transpose v0.2.3
+       Fresh ort-sys v2.0.0-rc.11
+       Fresh time v0.3.47
+       Fresh windows-sys v0.59.0
+       Fresh pbkdf2 v0.11.0
+       Fresh anstream v0.6.21
+       Fresh zstd v0.11.2+zstd.1.5.2
+       Fresh petgraph v0.6.5
+       Fresh regex-automata v0.4.14
+       Fresh primal-check v0.3.4
+       Fresh ordered-float v4.6.0
+       Fresh roaring v0.10.12
+       Fresh tokio-macros v2.6.0
+       Fresh mio v1.1.1
+       Fresh winapi-util v0.1.11
+       Fresh unicode-width v0.2.2
+       Fresh clap_lex v1.0.0
+       Fresh winnow v0.5.40
+       Fresh bytes v1.11.1
+       Fresh log v0.4.29
+       Fresh encode_unicode v1.0.0
+       Fresh constant_time_eq v0.1.5
+       Fresh heck v0.5.0
+       Fresh strsim v0.11.1
+       Fresh sharded-slab v0.1.7
+       Fresh ruvector-core v2.0.5
+       Fresh clap_builder v4.5.60
+       Fresh rustfft v6.4.1
+       Fresh clap_derive v4.5.55
+       Fresh portable-atomic v1.13.1
+       Fresh matchers v0.2.0
+       Fresh same-file v1.0.6
+       Fresh tokio v1.49.0
+       Fresh ruvector-solver v2.0.4
+       Fresh tracing-log v0.2.0
+       Fresh console v0.15.11
+       Fresh ort v2.0.0-rc.11
+       Fresh zip v0.6.6
+       Fresh py_literal v0.4.0
+       Fresh toml_edit v0.20.2
+       Fresh midstreamer-attractor v0.1.0
+       Fresh ruvector-attention v2.0.4
+       Fresh wifi-densepose-core v0.3.0 (C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\crates\wifi-densepose-core)
+       Fresh zip v0.5.13
+       Fresh ruvector-attn-mincut v2.0.4
+       Fresh safetensors v0.3.3
+       Fresh half v2.7.1
+       Fresh tracing-serde v0.2.0
+       Fresh nu-ansi-term v0.50.3
+       Fresh csv-core v0.1.13
+       Fresh thread_local v1.1.9
+       Fresh number_prefix v0.4.0
+       Fresh ryu v1.0.23
+       Fresh memmap2 v0.9.10
+       Fresh ruvector-temporal-tensor v2.0.4
+       Fresh ruvector-mincut v2.0.4
+       Fresh indicatif v0.17.11
+       Fresh ndarray-npy v0.8.1
+       Fresh toml v0.8.2
+       Fresh clap v4.5.60
+       Fresh wifi-densepose-nn v0.3.0 (C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\crates\wifi-densepose-nn)
+warning: unused variable: `batch`
+   --> crates\wifi-densepose-nn\src\densepose.rs:257:14
+    |
+257 |         let (batch, _channels, height, width) = input_arr.dim();
+    |              ^^^^^ help: if this is intentional, prefix it with an underscore: `_batch`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `height`
+   --> crates\wifi-densepose-nn\src\densepose.rs:257:32
+    |
+257 |         let (batch, _channels, height, width) = input_arr.dim();
+    |                                ^^^^^^ help: if this is intentional, prefix it with an underscore: `_height`
+
+warning: unused variable: `width`
+   --> crates\wifi-densepose-nn\src\densepose.rs:257:40
+    |
+257 |         let (batch, _channels, height, width) = input_arr.dim();
+    |                                        ^^^^^ help: if this is intentional, prefix it with an underscore: `_width`
+
+warning: unused variable: `inputs`
+   --> crates\wifi-densepose-nn\src\inference.rs:209:19
+    |
+209 |     fn run(&self, inputs: HashMap<String, Tensor>) -> NnResult<HashMap<String, Tensor>> {
+    |                   ^^^^^^ help: if this is intentional, prefix it with an underscore: `_inputs`
+
+warning: unused variable: `axis`
+   --> crates\wifi-densepose-nn\src\tensor.rs:269:27
+    |
+269 |     pub fn softmax(&self, axis: usize) -> NnResult<Tensor> {
+    |                           ^^^^ help: if this is intentional, prefix it with an underscore: `_axis`
+
+warning: unused variable: `batch`
+   --> crates\wifi-densepose-nn\src\translator.rs:347:14
+    |
+347 |         let (batch, _channels, height, width) = input_arr.dim();
+    |              ^^^^^ help: if this is intentional, prefix it with an underscore: `_batch`
+
+warning: unused variable: `height`
+   --> crates\wifi-densepose-nn\src\translator.rs:347:32
+    |
+347 |         let (batch, _channels, height, width) = input_arr.dim();
+    |                                ^^^^^^ help: if this is intentional, prefix it with an underscore: `_height`
+
+warning: unused variable: `width`
+   --> crates\wifi-densepose-nn\src\translator.rs:347:40
+    |
+347 |         let (batch, _channels, height, width) = input_arr.dim();
+    |                                        ^^^^^ help: if this is intentional, prefix it with an underscore: `_width`
+
+warning: unused variable: `kernel_h`
+   --> crates\wifi-densepose-nn\src\translator.rs:467:31
+    |
+467 |         let (out_channels, _, kernel_h, kernel_w) = weights.conv_weight.dim();
+    |                               ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_kernel_h`
+
+warning: unused variable: `kernel_w`
+   --> crates\wifi-densepose-nn\src\translator.rs:467:41
+    |
+467 |         let (out_channels, _, kernel_h, kernel_w) = weights.conv_weight.dim();
+    |                                         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_kernel_w`
+
+warning: unused variable: `weights`
+   --> crates\wifi-densepose-nn\src\translator.rs:542:9
+    |
+542 |         weights: &AttentionWeights,
+    |         ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_weights`
+
+warning: field `options` is never read
+   --> crates\wifi-densepose-nn\src\inference.rs:366:5
+    |
+356 | pub struct WiFiDensePosePipeline<B: Backend> {
+    |            --------------------- field in this struct
+...
+366 |     options: InferenceOptions,
+    |     ^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+       Fresh csv v1.4.0
+       Fresh walkdir v2.5.0
+       Fresh tracing-subscriber v0.3.22
+warning: `wifi-densepose-nn` (lib) generated 12 warnings (run `cargo fix --lib -p wifi-densepose-nn` to apply 11 suggestions)
+   Compiling torch-sys v0.23.0 (https://github.com/LaurentMazare/tch-rs.git#b1541a2a)
+       Fresh wifi-densepose-signal v0.3.0 (C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\crates\wifi-densepose-signal)
+warning: fields `phase_aligner` and `gate_policy` are never read
+   --> crates\wifi-densepose-signal\src\ruvsense\mod.rs:182:5
+    |
+180 | pub struct RuvSensePipeline {
+    |            ---------------- fields in this struct
+181 |     config: RuvSenseConfig,
+182 |     phase_aligner: PhaseAligner,
+    |     ^^^^^^^^^^^^^
+183 |     coherence_state: CoherenceState,
+184 |     gate_policy: GatePolicy,
+    |     ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `timestamp_us` is never read
+   --> crates\wifi-densepose-signal\src\ruvsense\intention.rs:110:5
+    |
+108 | struct TrajectoryPoint {
+    |        --------------- field in this struct
+109 |     embedding: Vec<f64>,
+110 |     timestamp_us: u64,
+    |     ^^^^^^^^^^^^
+    |
+    = note: `TrajectoryPoint` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: field `predict_only_noise` is never read
+  --> crates\wifi-densepose-signal\src\ruvsense\coherence_gate.rs:99:5
+   |
+91 | pub struct GatePolicy {
+   |            ---------- field in this struct
+...
+99 |     predict_only_noise: f32,
+   |     ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `GatePolicy` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: field `num_channels` is never read
+  --> crates\wifi-densepose-signal\src\ruvsense\phase_align.rs:72:5
+   |
+70 | pub struct PhaseAligner {
+   |            ------------ field in this struct
+71 |     /// Number of channels expected.
+72 |     num_channels: usize,
+   |     ^^^^^^^^^^^^
+   |
+   = note: `PhaseAligner` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+     Running `set CARGO=C:\Users\bin9208-1\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin\cargo.exe&& set CARGO_CFG_FEATURE=""&& set CARGO_CFG_PANIC=unwind&& set CARGO_CFG_TARGET_ABI=""&& set CARGO_CFG_TARGET_ARCH=x86_64&& set CARGO_CFG_TARGET_ENDIAN=little&& set CARGO_CFG_TARGET_ENV=msvc&& set CARGO_CFG_TARGET_FAMILY=windows&& set CARGO_CFG_TARGET_FEATURE=cmpxchg16b,fxsr,sse,sse2,sse3&& set CARGO_CFG_TARGET_HAS_ATOMIC=128,16,32,64,8,ptr&& set CARGO_CFG_TARGET_OS=windows&& set CARGO_CFG_TARGET_POINTER_WIDTH=64&& set CARGO_CFG_TARGET_VENDOR=pc&& set CARGO_CFG_WINDOWS=""&& set CARGO_ENCODED_RUSTFLAGS=""&& set CARGO_MANIFEST_DIR=C:\Users\bin9208-1\.cargo\git\checkouts\tch-rs-a202272c5de761c5\b1541a2\torch-sys&& set CARGO_MANIFEST_LINKS=tch&& set CARGO_MANIFEST_PATH=C:\Users\bin9208-1\.cargo\git\checkouts\tch-rs-a202272c5de761c5\b1541a2\torch-sys\Cargo.toml&& set CARGO_PKG_AUTHORS="Laurent Mazare <lmazare@gmail.com>"&& set CARGO_PKG_DESCRIPTION="Low-level FFI bindings for the PyTorch C++ api (libtorch)."&& set CARGO_PKG_HOMEPAGE=""&& set CARGO_PKG_LICENSE=MIT/Apache-2.0&& set CARGO_PKG_LICENSE_FILE=""&& set CARGO_PKG_NAME=torch-sys&& set CARGO_PKG_README=""&& set CARGO_PKG_REPOSITORY=https://github.com/LaurentMazare/tch-rs&& set CARGO_PKG_RUST_VERSION=""&& set CARGO_PKG_VERSION=0.23.0&& set CARGO_PKG_VERSION_MAJOR=0&& set CARGO_PKG_VERSION_MINOR=23&& set CARGO_PKG_VERSION_PATCH=0&& set CARGO_PKG_VERSION_PRE=""&& set DEBUG=false&& set HOST=x86_64-pc-windows-msvc&& set NUM_JOBS=32&& set OPT_LEVEL=3&& set OUT_DIR=C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release\build\torch-sys-56edc1097e31eab1\out&& set PATH="C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release;C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release\deps;C:\Users\bin9208-1\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib;C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\lib;C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\bin\x64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\NVIDIA Corporation\NVIDIA app\NvDLISR;C:\Program Files\dotnet\;C:\Program Files\Bandizip\;C:\Program Files\PuTTY\;C:\Program Files\Cloudflare\Cloudflare WARP\;C:\Program Files\Mullvad VPN\resources;C:\Program Files\Git\cmd;C:\Program Files\nodejs\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\NVIDIA Corporation\Nsight Compute 2026.1.0\;C:\Users\bin9208-1\.cargo\bin;C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Scripts\;C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\;C:\Users\bin9208-1\AppData\Local\Microsoft\WindowsApps;C:\Program Files (x86)\SVP 4\mpv64;C:\Users\bin9208-1\AppData\Roaming\npm;C:\Users\bin9208-1\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\bin9208-1\Documents\sdk\flutter\bin;C:\Users\bin9208-1\AppData\Local\Android\Sdk\cmdline-tools\latest\bin;C:\Users\bin9208-1\AppData\Local\Android\Sdk\platform-tools;C:\Users\bin9208-1\AppData\Local\Android\Sdk\emulator;C:\Users\bin9208-1\AppData\Local\Programs\Antigravity\bin;C:\Users\bin9208-1\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin;C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release\build\bzip2-sys-03b22c3d41d3558f\out\lib;C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release\build\zstd-sys-9e1db9d4b218c6dc\out"&& set PROFILE=release&& set RUSTC=C:\Users\bin9208-1\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin\rustc.exe&& set RUSTDOC=C:\Users\bin9208-1\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin\rustdoc.exe&& set TARGET=x86_64-pc-windows-msvc&& C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release\build\torch-sys-e0157a0f9878405a\build-script-build`
+warning: `wifi-densepose-signal` (lib) generated 4 warnings
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=LIBTORCH_USE_PYTORCH
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=LIBTORCH_BYPASS_VERSION_CHECK
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=LIBTORCH_STATIC
+[torch-sys 0.23.0] cargo:rustc-link-search=native=C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\lib
+[torch-sys 0.23.0] cargo:rerun-if-changed=libtch/torch_python.cpp
+[torch-sys 0.23.0] cargo:rerun-if-changed=libtch/torch_python.h
+[torch-sys 0.23.0] cargo:rerun-if-changed=libtch/torch_api_generated.cpp
+[torch-sys 0.23.0] cargo:rerun-if-changed=libtch/torch_api_generated.h
+[torch-sys 0.23.0] cargo:rerun-if-changed=libtch/torch_api.cpp
+[torch-sys 0.23.0] cargo:rerun-if-changed=libtch/torch_api.h
+[torch-sys 0.23.0] cargo:rerun-if-changed=libtch/stb_image_write.h
+[torch-sys 0.23.0] cargo:rerun-if-changed=libtch/stb_image_resize.h
+[torch-sys 0.23.0] cargo:rerun-if-changed=libtch/stb_image.h
+[torch-sys 0.23.0] OUT_DIR = Some(C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release\build\torch-sys-56edc1097e31eab1\out)
+[torch-sys 0.23.0] OPT_LEVEL = Some(3)
+[torch-sys 0.23.0] TARGET = Some(x86_64-pc-windows-msvc)
+[torch-sys 0.23.0] CARGO_ENCODED_RUSTFLAGS = Some()
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=VCINSTALLDIR
+[torch-sys 0.23.0] VCINSTALLDIR = Some(C:\Program Files\Microsoft Visual Studio\2022\Community\VC\)
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=VSCMD_ARG_TGT_ARCH
+[torch-sys 0.23.0] VSCMD_ARG_TGT_ARCH = Some(x64)
+[torch-sys 0.23.0] PATH = Some(C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release;C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release\deps;C:\Users\bin9208-1\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib;C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\lib;C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\bin\x64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\NVIDIA Corporation\NVIDIA app\NvDLISR;C:\Program Files\dotnet\;C:\Program Files\Bandizip\;C:\Program Files\PuTTY\;C:\Program Files\Cloudflare\Cloudflare WARP\;C:\Program Files\Mullvad VPN\resources;C:\Program Files\Git\cmd;C:\Program Files\nodejs\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\NVIDIA Corporation\Nsight Compute 2026.1.0\;C:\Users\bin9208-1\.cargo\bin;C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Scripts\;C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\;C:\Users\bin9208-1\AppData\Local\Microsoft\WindowsApps;C:\Program Files (x86)\SVP 4\mpv64;C:\Users\bin9208-1\AppData\Roaming\npm;C:\Users\bin9208-1\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\bin9208-1\Documents\sdk\flutter\bin;C:\Users\bin9208-1\AppData\Local\Android\Sdk\cmdline-tools\latest\bin;C:\Users\bin9208-1\AppData\Local\Android\Sdk\platform-tools;C:\Users\bin9208-1\AppData\Local\Android\Sdk\emulator;C:\Users\bin9208-1\AppData\Local\Programs\Antigravity\bin;C:\Users\bin9208-1\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin;C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release\build\bzip2-sys-03b22c3d41d3558f\out\lib;C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release\build\zstd-sys-9e1db9d4b218c6dc\out)
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=VCToolsVersion
+[torch-sys 0.23.0] VCToolsVersion = Some(14.44.35207)
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=VSCMD_ARG_VCVARS_SPECTRE
+[torch-sys 0.23.0] VSCMD_ARG_VCVARS_SPECTRE = None
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=WindowsSdkDir
+[torch-sys 0.23.0] WindowsSdkDir = Some(C:\Program Files (x86)\Windows Kits\10\)
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=WindowsSDKVersion
+[torch-sys 0.23.0] WindowsSDKVersion = Some(10.0.26100.0\)
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=LIB
+[torch-sys 0.23.0] LIB = Some(C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\ATLMFC\lib\x64;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\lib\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.26100.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\\lib\10.0.26100.0\\um\x64)
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=INCLUDE
+[torch-sys 0.23.0] INCLUDE = Some(C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\ATLMFC\include;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\include;C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt;C:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\um;C:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\shared;C:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\winrt;C:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\cppwinrt)
+[torch-sys 0.23.0] HOST = Some(x86_64-pc-windows-msvc)
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=CXX_x86_64-pc-windows-msvc
+[torch-sys 0.23.0] CXX_x86_64-pc-windows-msvc = None
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=CXX_x86_64_pc_windows_msvc
+[torch-sys 0.23.0] CXX_x86_64_pc_windows_msvc = None
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=HOST_CXX
+[torch-sys 0.23.0] HOST_CXX = None
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=CXX
+[torch-sys 0.23.0] CXX = None
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+[torch-sys 0.23.0] CRATE_CC_NO_DEFAULTS = None
+[torch-sys 0.23.0] CARGO_CFG_TARGET_FEATURE = Some(cmpxchg16b,fxsr,sse,sse2,sse3)
+[torch-sys 0.23.0] DEBUG = Some(false)
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=CXXFLAGS
+[torch-sys 0.23.0] CXXFLAGS = None
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=HOST_CXXFLAGS
+[torch-sys 0.23.0] HOST_CXXFLAGS = None
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=CXXFLAGS_x86_64_pc_windows_msvc
+[torch-sys 0.23.0] CXXFLAGS_x86_64_pc_windows_msvc = None
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=CXXFLAGS_x86_64-pc-windows-msvc
+[torch-sys 0.23.0] CXXFLAGS_x86_64-pc-windows-msvc = None
+[torch-sys 0.23.0] cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+[torch-sys 0.23.0] torch_api.cpp
+[torch-sys 0.23.0] torch_api_generated.cpp
+[torch-sys 0.23.0] cargo:warning=cl : ������ warning D9002 : �� �� ���� '/p:DefineConstants=GLOG_USE_GLOG_EXPORT' �ɼ��� �����մϴ�.
+[torch-sys 0.23.0] cargo:warning=cl : ������ warning D9002 : �� �� ���� '/p:DefineConstants=GLOG_USE_GLOG_EXPORT' �ɼ��� �����մϴ�.
+[torch-sys 0.23.0] 
+[torch-sys 0.23.0] cargo:warning=cl : ������ warning D9002 : �� �� ���� '/p:DefineConstants=GLOG_USE_GLOG_EXPORT' �ɼ��� �����մϴ�.
+[torch-sys 0.23.0] cargo:warning=cl : ������ warning D9002 : �� �� ���� '/p:DefineConstants=GLOG_USE_GLOG_EXPORT' �ɼ��� �����մϴ�.
+[torch-sys 0.23.0] 
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(352): error C2660: 'at::_assert_tensor_metadata': �Լ��� 6���� �μ��� ������� �ʽ��ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/_assert_tensor_metadata.h(26): note: 'at::_assert_tensor_metadata' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(352): note: �μ� ��� '(at::Tensor, std::optional<c10::IntArrayRef>, std::optional<c10::IntArrayRef>, std::optional<c10::ScalarType>, c10::Device, std::optional<c10::Layout>)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(655): error C2039: '_convert_weight_to_int4pack_for_cpu': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(655): error C3861: '_convert_weight_to_int4pack_for_cpu': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(725): error C2660: 'at::_cslt_sparse_mm': �Լ��� 9���� �μ��� ������� �ʽ��ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/_cslt_sparse_mm.h(26): note: 'at::_cslt_sparse_mm' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(725): note: �μ� ��� '(at::Tensor, at::Tensor, std::optional<at::Tensor>, std::optional<at::Tensor>, std::optional<c10::ScalarType>, bool, int64_t, int64_t, int64_t)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): error C2039: '_cudnn_attention_backward': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): error C3861: '_cudnn_attention_backward': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): error C2672: 'std::get': ��ġ�ϴ� �����ε�� �Լ��� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1234): note: 'decltype(auto) std::get(const std::variant<_Types...> &&)'�� �� �ֽ��ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1223): note: �Ǵ�       'decltype(auto) std::get(const std::variant<_Types...> &)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1212): note: �Ǵ�       'decltype(auto) std::get(std::variant<_Types...> &&)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1201): note: �Ǵ�       'decltype(auto) std::get(std::variant<_Types...> &)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1190): note: �Ǵ�       'decltype(auto) std::get(const std::variant<_Types...> &&)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'decltype(auto) std::get(const std::variant<_Types...> &&)': '<error type>'���� 'const std::variant<_Types...> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1180): note: �Ǵ�       'decltype(auto) std::get(const std::variant<_Types...> &)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'decltype(auto) std::get(const std::variant<_Types...> &)': '<error type>'���� 'const std::variant<_Types...> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1170): note: �Ǵ�       'decltype(auto) std::get(std::variant<_Types...> &&)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'decltype(auto) std::get(std::variant<_Types...> &&)': '<error type>'���� 'std::variant<_Types...> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1160): note: �Ǵ�       'decltype(auto) std::get(std::variant<_Types...> &)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'decltype(auto) std::get(std::variant<_Types...> &)': '<error type>'���� 'std::variant<_Types...> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\tuple(969): note: �Ǵ�       'const _Ty &&std::get(const std::tuple<_Types...> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\tuple(957): note: �Ǵ�       '_Ty &&std::get(std::tuple<_Types...> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\tuple(945): note: �Ǵ�       'const _Ty &std::get(const std::tuple<_Types...> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\tuple(933): note: �Ǵ�       '_Ty &std::get(std::tuple<_Types...> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(764): note: �Ǵ�       'const _Ty2 &&std::get(const std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty2'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(758): note: �Ǵ�       'const _Ty1 &&std::get(const std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty1'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(748): note: �Ǵ�       'const tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &&std::get(const std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'const tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &&std::get(const std::pair<_Ty1,_Ty2> &&) noexcept': '<error type>'���� 'const std::pair<_Ty1,_Ty2> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(742): note: �Ǵ�       '_Ty2 &&std::get(std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty2'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(736): note: �Ǵ�       '_Ty1 &&std::get(std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty1'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(726): note: �Ǵ�       'tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &&std::get(std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &&std::get(std::pair<_Ty1,_Ty2> &&) noexcept': '<error type>'���� 'std::pair<_Ty1,_Ty2> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(720): note: �Ǵ�       'const _Ty2 &std::get(const std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty2'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(714): note: �Ǵ�       'const _Ty1 &std::get(const std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty1'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(704): note: �Ǵ�       'const tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(const std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'const tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(const std::pair<_Ty1,_Ty2> &) noexcept': '<error type>'���� 'const std::pair<_Ty1,_Ty2> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(698): note: �Ǵ�       '_Ty2 &std::get(std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty2'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(692): note: �Ǵ�       '_Ty1 &std::get(std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'std::get': '_Ty1'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(682): note: �Ǵ�       'tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(std::pair<_Ty1,_Ty2> &) noexcept': '<error type>'���� 'std::pair<_Ty1,_Ty2> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(206): note: �Ǵ�       'const _Ty &&std::get(const std::array<_Ty,_Size> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'const _Ty &&std::get(const std::array<_Ty,_Size> &&) noexcept': '<error type>'���� 'const std::array<_Ty,_Size> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(203): note: �Ǵ�       '_Ty &&std::get(std::array<_Ty,_Size> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: '_Ty &&std::get(std::array<_Ty,_Size> &&) noexcept': '<error type>'���� 'std::array<_Ty,_Size> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(200): note: �Ǵ�       'const _Ty &std::get(const std::array<_Ty,_Size> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'const _Ty &std::get(const std::array<_Ty,_Size> &) noexcept': '<error type>'���� 'const std::array<_Ty,_Size> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(197): note: �Ǵ�       '_Ty &std::get(std::array<_Ty,_Size> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: '_Ty &std::get(std::array<_Ty,_Size> &) noexcept': '<error type>'���� 'std::array<_Ty,_Size> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(194): note: �Ǵ�       'const tuple_element<_Index,std::tuple<_Types...>>::type &&std::get(const std::tuple<_Types...> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'const tuple_element<_Index,std::tuple<_Types...>>::type &&std::get(const std::tuple<_Types...> &&) noexcept': '<error type>'���� 'const std::tuple<_Types...> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(191): note: �Ǵ�       'tuple_element<_Index,std::tuple<_Types...>>::type &&std::get(std::tuple<_Types...> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'tuple_element<_Index,std::tuple<_Types...>>::type &&std::get(std::tuple<_Types...> &&) noexcept': '<error type>'���� 'std::tuple<_Types...> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(188): note: �Ǵ�       'const tuple_element<_Index,std::tuple<_Types...>>::type &std::get(const std::tuple<_Types...> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'const tuple_element<_Index,std::tuple<_Types...>>::type &std::get(const std::tuple<_Types...> &) noexcept': '<error type>'���� 'const std::tuple<_Types...> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(185): note: �Ǵ�       'tuple_element<_Index,std::tuple<_Types...>>::type &std::get(std::tuple<_Types...> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(792): note: 'tuple_element<_Index,std::tuple<_Types...>>::type &std::get(std::tuple<_Types...> &) noexcept': '<error type>'���� 'std::tuple<_Types...> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(917): error C2039: '_dyn_quant_matmul_4bit': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(917): error C3861: '_dyn_quant_matmul_4bit': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(924): error C2039: '_dyn_quant_pack_4bit_weight': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(924): error C3861: '_dyn_quant_pack_4bit_weight': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): error C2039: '_fused_rms_norm': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): error C3861: '_fused_rms_norm': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): error C2672: 'std::get': ��ġ�ϴ� �����ε�� �Լ��� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1234): note: 'decltype(auto) std::get(const std::variant<_Types...> &&)'�� �� �ֽ��ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1223): note: �Ǵ�       'decltype(auto) std::get(const std::variant<_Types...> &)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1212): note: �Ǵ�       'decltype(auto) std::get(std::variant<_Types...> &&)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1201): note: �Ǵ�       'decltype(auto) std::get(std::variant<_Types...> &)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1190): note: �Ǵ�       'decltype(auto) std::get(const std::variant<_Types...> &&)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'decltype(auto) std::get(const std::variant<_Types...> &&)': '<error type>'���� 'const std::variant<_Types...> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1180): note: �Ǵ�       'decltype(auto) std::get(const std::variant<_Types...> &)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'decltype(auto) std::get(const std::variant<_Types...> &)': '<error type>'���� 'const std::variant<_Types...> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1170): note: �Ǵ�       'decltype(auto) std::get(std::variant<_Types...> &&)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'decltype(auto) std::get(std::variant<_Types...> &&)': '<error type>'���� 'std::variant<_Types...> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1160): note: �Ǵ�       'decltype(auto) std::get(std::variant<_Types...> &)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'decltype(auto) std::get(std::variant<_Types...> &)': '<error type>'���� 'std::variant<_Types...> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\tuple(969): note: �Ǵ�       'const _Ty &&std::get(const std::tuple<_Types...> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\tuple(957): note: �Ǵ�       '_Ty &&std::get(std::tuple<_Types...> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\tuple(945): note: �Ǵ�       'const _Ty &std::get(const std::tuple<_Types...> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\tuple(933): note: �Ǵ�       '_Ty &std::get(std::tuple<_Types...> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(764): note: �Ǵ�       'const _Ty2 &&std::get(const std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty2'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(758): note: �Ǵ�       'const _Ty1 &&std::get(const std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty1'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(748): note: �Ǵ�       'const tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &&std::get(const std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'const tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &&std::get(const std::pair<_Ty1,_Ty2> &&) noexcept': '<error type>'���� 'const std::pair<_Ty1,_Ty2> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(742): note: �Ǵ�       '_Ty2 &&std::get(std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty2'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(736): note: �Ǵ�       '_Ty1 &&std::get(std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty1'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(726): note: �Ǵ�       'tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &&std::get(std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &&std::get(std::pair<_Ty1,_Ty2> &&) noexcept': '<error type>'���� 'std::pair<_Ty1,_Ty2> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(720): note: �Ǵ�       'const _Ty2 &std::get(const std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty2'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(714): note: �Ǵ�       'const _Ty1 &std::get(const std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty1'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(704): note: �Ǵ�       'const tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(const std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'const tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(const std::pair<_Ty1,_Ty2> &) noexcept': '<error type>'���� 'const std::pair<_Ty1,_Ty2> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(698): note: �Ǵ�       '_Ty2 &std::get(std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty2'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(692): note: �Ǵ�       '_Ty1 &std::get(std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'std::get': '_Ty1'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(682): note: �Ǵ�       'tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(std::pair<_Ty1,_Ty2> &) noexcept': '<error type>'���� 'std::pair<_Ty1,_Ty2> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(206): note: �Ǵ�       'const _Ty &&std::get(const std::array<_Ty,_Size> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'const _Ty &&std::get(const std::array<_Ty,_Size> &&) noexcept': '<error type>'���� 'const std::array<_Ty,_Size> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(203): note: �Ǵ�       '_Ty &&std::get(std::array<_Ty,_Size> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: '_Ty &&std::get(std::array<_Ty,_Size> &&) noexcept': '<error type>'���� 'std::array<_Ty,_Size> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(200): note: �Ǵ�       'const _Ty &std::get(const std::array<_Ty,_Size> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'const _Ty &std::get(const std::array<_Ty,_Size> &) noexcept': '<error type>'���� 'const std::array<_Ty,_Size> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(197): note: �Ǵ�       '_Ty &std::get(std::array<_Ty,_Size> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: '_Ty &std::get(std::array<_Ty,_Size> &) noexcept': '<error type>'���� 'std::array<_Ty,_Size> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(194): note: �Ǵ�       'const tuple_element<_Index,std::tuple<_Types...>>::type &&std::get(const std::tuple<_Types...> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'const tuple_element<_Index,std::tuple<_Types...>>::type &&std::get(const std::tuple<_Types...> &&) noexcept': '<error type>'���� 'const std::tuple<_Types...> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(191): note: �Ǵ�       'tuple_element<_Index,std::tuple<_Types...>>::type &&std::get(std::tuple<_Types...> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'tuple_element<_Index,std::tuple<_Types...>>::type &&std::get(std::tuple<_Types...> &&) noexcept': '<error type>'���� 'std::tuple<_Types...> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(188): note: �Ǵ�       'const tuple_element<_Index,std::tuple<_Types...>>::type &std::get(const std::tuple<_Types...> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'const tuple_element<_Index,std::tuple<_Types...>>::type &std::get(const std::tuple<_Types...> &) noexcept': '<error type>'���� 'const std::tuple<_Types...> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(185): note: �Ǵ�       'tuple_element<_Index,std::tuple<_Types...>>::type &std::get(std::tuple<_Types...> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1285): note: 'tuple_element<_Index,std::tuple<_Types...>>::type &std::get(std::tuple<_Types...> &) noexcept': '<error type>'���� 'std::tuple<_Types...> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1350): error C2039: '_grouped_mm': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1350): error C3861: '_grouped_mm': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1988): error C2039: '_nested_from_padded_tensor': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(1988): error C3861: '_nested_from_padded_tensor': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(2416): error C2039: '_scaled_grouped_mm': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(2416): error C3861: '_scaled_grouped_mm': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(2423): error C2039: '_scaled_grouped_mm_v2': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(2423): error C3861: '_scaled_grouped_mm_v2': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(2444): error C2039: '_scaled_mm_v2': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(2444): error C3861: '_scaled_mm_v2': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(2451): error C2039: '_scaled_mm_v2_out': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(2451): error C3861: '_scaled_mm_v2_out': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3625): error C2660: 'at::_validate_sparse_bsc_tensor_args': �Լ��� 5���� �μ��� ������� �ʽ��ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/_validate_sparse_bsc_tensor_args.h(26): note: 'at::_validate_sparse_bsc_tensor_args' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3625): note: �μ� ��� '(at::Tensor, at::Tensor, at::Tensor, at::IntArrayRef, bool)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3631): error C2660: 'at::_validate_sparse_bsr_tensor_args': �Լ��� 5���� �μ��� ������� �ʽ��ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/_validate_sparse_bsr_tensor_args.h(26): note: 'at::_validate_sparse_bsr_tensor_args' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3631): note: �μ� ��� '(at::Tensor, at::Tensor, at::Tensor, at::IntArrayRef, bool)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3637): error C2660: 'at::_validate_sparse_compressed_tensor_args': �Լ��� 6���� �μ��� ������� �ʽ��ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/_validate_sparse_compressed_tensor_args.h(26): note: 'at::_validate_sparse_compressed_tensor_args' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3637): note: �μ� ��� '(at::Tensor, at::Tensor, at::Tensor, at::IntArrayRef, c10::Layout, bool)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3643): error C2660: 'at::_validate_sparse_csc_tensor_args': �Լ��� 5���� �μ��� ������� �ʽ��ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/_validate_sparse_csc_tensor_args.h(26): note: 'at::_validate_sparse_csc_tensor_args' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3643): note: �μ� ��� '(at::Tensor, at::Tensor, at::Tensor, at::IntArrayRef, bool)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3649): error C2660: 'at::_validate_sparse_csr_tensor_args': �Լ��� 5���� �μ��� ������� �ʽ��ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/_validate_sparse_csr_tensor_args.h(26): note: 'at::_validate_sparse_csr_tensor_args' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3649): note: �μ� ��� '(at::Tensor, at::Tensor, at::Tensor, at::IntArrayRef, bool)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3690): error C2039: '_weight_int4pack_mm_for_cpu': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3690): error C3861: '_weight_int4pack_mm_for_cpu': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3697): error C2039: '_weight_int4pack_mm_with_scales_and_zeros': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3697): error C3861: '_weight_int4pack_mm_with_scales_and_zeros': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3863): error C2039: 'adaptive_avg_pool1d_out': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(3863): error C3861: 'adaptive_avg_pool1d_out': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4092): error C2664: 'at::Tensor at::addmm(const at::Tensor &,const at::Tensor &,const at::Tensor &,const c10::Scalar &,const c10::Scalar &)': �μ� 4��(��) 'c10::ScalarType'���� 'const c10::Scalar &'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4092): note: ����: 'c10::ScalarType'���� 'const c10::Scalar'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4092): note: �� ��ȯ�� ������ �� �ִ� ��� ������ ����� ���� ��ȯ �����ڰ� ���ų� �����ڸ� ȣ���� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/addmm.h(35): note: 'at::addmm' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4092): note: �μ� ��� '(at::Tensor, at::Tensor, at::Tensor, c10::ScalarType)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4099): error C2664: 'at::Tensor &at::addmm_out(at::Tensor &,const at::Tensor &,const at::Tensor &,const at::Tensor &,const c10::Scalar &,const c10::Scalar &)': �μ� 5��(��) 'c10::ScalarType'���� 'const c10::Scalar &'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4099): note: ����: 'c10::ScalarType'���� 'const c10::Scalar'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4099): note: �� ��ȯ�� ������ �� �ִ� ��� ������ ����� ���� ��ȯ �����ڰ� ���ų� �����ڸ� ȣ���� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/addmm.h(26): note: 'at::addmm_out' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4099): note: �μ� ��� '(at::Tensor, at::Tensor, at::Tensor, at::Tensor, c10::ScalarType)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4825): error C2039: 'avg_pool1d_out': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4825): error C3861: 'avg_pool1d_out': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4902): error C2660: 'at::baddbmm': �Լ��� 6���� �μ��� ������� �ʽ��ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/baddbmm.h(26): note: 'at::baddbmm' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4902): note: �μ� ��� '(at::Tensor, at::Tensor, at::Tensor, c10::ScalarType, c10::Scalar, c10::Scalar)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4909): error C2664: 'at::Tensor &at::baddbmm_out(at::Tensor &,const at::Tensor &,const at::Tensor &,const at::Tensor &,const c10::Scalar &,const c10::Scalar &)': �μ� 5��(��) 'c10::ScalarType'���� 'const c10::Scalar &'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4909): note: ����: 'c10::ScalarType'���� 'const c10::Scalar'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4909): note: �� ��ȯ�� ������ �� �ִ� ��� ������ ����� ���� ��ȯ �����ڰ� ���ų� �����ڸ� ȣ���� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/baddbmm.h(31): note: 'at::baddbmm_out' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(4909): note: �μ� ��� '(at::Tensor, at::Tensor, at::Tensor, at::Tensor, c10::ScalarType)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(5532): error C2660: 'at::bmm': �Լ��� 3���� �μ��� ������� �ʽ��ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/bmm.h(26): note: 'at::bmm' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(5532): note: �μ� ��� '(at::Tensor, at::Tensor, c10::ScalarType)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(5539): error C2660: 'at::bmm_out': �Լ��� 4���� �μ��� ������� �ʽ��ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/bmm.h(31): note: 'at::bmm_out' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(5539): note: �μ� ��� '(at::Tensor, at::Tensor, at::Tensor, c10::ScalarType)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(9149): error C2039: 'hash_tensor': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(9149): error C3861: 'hash_tensor': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(9156): error C2039: 'hash_tensor_out': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(9156): error C3861: 'hash_tensor_out': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\__msvc_ostream.hpp(781): warning C4530: C++ ���� ó���Ⱑ ���Ǿ����� ���� �ǹ� ü�谡 Ȱ��ȭ���� �ʾҽ��ϴ�. /EHsc�� �����Ͻʽÿ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\__msvc_ostream.hpp(781): note: ���ø� �ν��Ͻ�ȭ ���ؽ�Ʈ(���� ������ �ν��Ͻ�ȭ ���ؽ�Ʈ)��
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\c10/util/StringUtil.h(150): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ 'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const char *)'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(12375): error C2660: 'at::mm': �Լ��� 3���� �μ��� ������� �ʽ��ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/mm.h(26): note: 'at::mm' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(12375): note: �μ� ��� '(at::Tensor, at::Tensor, c10::ScalarType)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(12382): error C2660: 'at::mm_out': �Լ��� 4���� �μ��� ������� �ʽ��ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/mm.h(31): note: 'at::mm_out' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(12382): note: �μ� ��� '(at::Tensor, at::Tensor, at::Tensor, c10::ScalarType)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14038): error C2665: 'torch::randint_like': ��� �μ� ������ ��ȯ�� �� �ִ� �����ε�� �Լ��� �����ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch/csrc/autograd/generated/variable_factories.h(508): note: 'at::Tensor torch::randint_like(const at::Tensor &,int64_t,c10::TensorOptions,std::optional<c10::MemoryFormat>)'�� �� �ֽ��ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14038): note: 'at::Tensor torch::randint_like(const at::Tensor &,int64_t,c10::TensorOptions,std::optional<c10::MemoryFormat>)': �μ� 2��(��) 'at::Tensor'���� 'int64_t'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14038): note: �� ��ȯ�� ������ �� �ִ� ��� ������ ����� ���� ��ȯ �����ڰ� ���ų� �����ڸ� ȣ���� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14038): note: �μ� ��� '(at::Tensor, at::Tensor)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14045): error C2665: 'at::randint_like_out': ��� �μ� ������ ��ȯ�� �� �ִ� �����ε�� �Լ��� �����ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/randint_like.h(114): note: 'at::Tensor &at::randint_like_out(at::Tensor &,const at::Tensor &,int64_t,std::optional<c10::MemoryFormat>)'�� �� �ֽ��ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14045): note: 'at::Tensor &at::randint_like_out(at::Tensor &,const at::Tensor &,int64_t,std::optional<c10::MemoryFormat>)': �μ� 3��(��) 'at::Tensor'���� 'int64_t'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14045): note: �� ��ȯ�� ������ �� �ִ� ��� ������ ����� ���� ��ȯ �����ڰ� ���ų� �����ڸ� ȣ���� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14045): note: �μ� ��� '(at::Tensor, at::Tensor, at::Tensor)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): error C2039: 'rrelu_with_noise_functional': 'torch'�� ����� �ƴմϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch\csrc\api\include\torch/xpu.h(8): note: 'torch' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): error C3861: 'rrelu_with_noise_functional': �ĺ��ڸ� ã�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): error C2672: 'std::get': ��ġ�ϴ� �����ε�� �Լ��� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1234): note: 'decltype(auto) std::get(const std::variant<_Types...> &&)'�� �� �ֽ��ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1223): note: �Ǵ�       'decltype(auto) std::get(const std::variant<_Types...> &)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1212): note: �Ǵ�       'decltype(auto) std::get(std::variant<_Types...> &&)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1201): note: �Ǵ�       'decltype(auto) std::get(std::variant<_Types...> &)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1190): note: �Ǵ�       'decltype(auto) std::get(const std::variant<_Types...> &&)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'decltype(auto) std::get(const std::variant<_Types...> &&)': '<error type>'���� 'const std::variant<_Types...> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1180): note: �Ǵ�       'decltype(auto) std::get(const std::variant<_Types...> &)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'decltype(auto) std::get(const std::variant<_Types...> &)': '<error type>'���� 'const std::variant<_Types...> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1170): note: �Ǵ�       'decltype(auto) std::get(std::variant<_Types...> &&)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'decltype(auto) std::get(std::variant<_Types...> &&)': '<error type>'���� 'std::variant<_Types...> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1160): note: �Ǵ�       'decltype(auto) std::get(std::variant<_Types...> &)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'decltype(auto) std::get(std::variant<_Types...> &)': '<error type>'���� 'std::variant<_Types...> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\tuple(969): note: �Ǵ�       'const _Ty &&std::get(const std::tuple<_Types...> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\tuple(957): note: �Ǵ�       '_Ty &&std::get(std::tuple<_Types...> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\tuple(945): note: �Ǵ�       'const _Ty &std::get(const std::tuple<_Types...> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\tuple(933): note: �Ǵ�       '_Ty &std::get(std::tuple<_Types...> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(764): note: �Ǵ�       'const _Ty2 &&std::get(const std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty2'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(758): note: �Ǵ�       'const _Ty1 &&std::get(const std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty1'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(748): note: �Ǵ�       'const tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &&std::get(const std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'const tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &&std::get(const std::pair<_Ty1,_Ty2> &&) noexcept': '<error type>'���� 'const std::pair<_Ty1,_Ty2> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(742): note: �Ǵ�       '_Ty2 &&std::get(std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty2'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(736): note: �Ǵ�       '_Ty1 &&std::get(std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty1'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(726): note: �Ǵ�       'tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &&std::get(std::pair<_Ty1,_Ty2> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &&std::get(std::pair<_Ty1,_Ty2> &&) noexcept': '<error type>'���� 'std::pair<_Ty1,_Ty2> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(720): note: �Ǵ�       'const _Ty2 &std::get(const std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty2'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(714): note: �Ǵ�       'const _Ty1 &std::get(const std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty1'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(704): note: �Ǵ�       'const tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(const std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'const tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(const std::pair<_Ty1,_Ty2> &) noexcept': '<error type>'���� 'const std::pair<_Ty1,_Ty2> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(698): note: �Ǵ�       '_Ty2 &std::get(std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty2'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(692): note: �Ǵ�       '_Ty1 &std::get(std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'std::get': '_Ty1'�� ���ø� �μ��� �߸��Ǿ����ϴ�. ������ �ʿ��մϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(682): note: �Ǵ�       'tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(std::pair<_Ty1,_Ty2> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(std::pair<_Ty1,_Ty2> &) noexcept': '<error type>'���� 'std::pair<_Ty1,_Ty2> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(206): note: �Ǵ�       'const _Ty &&std::get(const std::array<_Ty,_Size> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'const _Ty &&std::get(const std::array<_Ty,_Size> &&) noexcept': '<error type>'���� 'const std::array<_Ty,_Size> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(203): note: �Ǵ�       '_Ty &&std::get(std::array<_Ty,_Size> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: '_Ty &&std::get(std::array<_Ty,_Size> &&) noexcept': '<error type>'���� 'std::array<_Ty,_Size> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(200): note: �Ǵ�       'const _Ty &std::get(const std::array<_Ty,_Size> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'const _Ty &std::get(const std::array<_Ty,_Size> &) noexcept': '<error type>'���� 'const std::array<_Ty,_Size> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(197): note: �Ǵ�       '_Ty &std::get(std::array<_Ty,_Size> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: '_Ty &std::get(std::array<_Ty,_Size> &) noexcept': '<error type>'���� 'std::array<_Ty,_Size> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(194): note: �Ǵ�       'const tuple_element<_Index,std::tuple<_Types...>>::type &&std::get(const std::tuple<_Types...> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'const tuple_element<_Index,std::tuple<_Types...>>::type &&std::get(const std::tuple<_Types...> &&) noexcept': '<error type>'���� 'const std::tuple<_Types...> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(191): note: �Ǵ�       'tuple_element<_Index,std::tuple<_Types...>>::type &&std::get(std::tuple<_Types...> &&) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'tuple_element<_Index,std::tuple<_Types...>>::type &&std::get(std::tuple<_Types...> &&) noexcept': '<error type>'���� 'std::tuple<_Types...> &&'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(188): note: �Ǵ�       'const tuple_element<_Index,std::tuple<_Types...>>::type &std::get(const std::tuple<_Types...> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'const tuple_element<_Index,std::tuple<_Types...>>::type &std::get(const std::tuple<_Types...> &) noexcept': '<error type>'���� 'const std::tuple<_Types...> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(185): note: �Ǵ�       'tuple_element<_Index,std::tuple<_Types...>>::type &std::get(std::tuple<_Types...> &) noexcept'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(14868): note: 'tuple_element<_Index,std::tuple<_Types...>>::type &std::get(std::tuple<_Types...> &) noexcept': '<error type>'���� 'std::tuple<_Types...> &'�� ���� ���ø� �μ��� �߷��� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17384): error C2665: 'at::stft': ��� �μ� ������ ��ȯ�� �� �ִ� �����ε�� �Լ��� �����ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/stft.h(31): note: 'at::Tensor at::stft(const at::Tensor &,int64_t,std::optional<int64_t>,std::optional<int64_t>,const std::optional<at::Tensor> &,bool,c10::string_view,bool,std::optional<bool>,std::optional<bool>)'�� �� �ֽ��ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17384): note: 'at::Tensor at::stft(const at::Tensor &,int64_t,std::optional<int64_t>,std::optional<int64_t>,const std::optional<at::Tensor> &,bool,c10::string_view,bool,std::optional<bool>,std::optional<bool>)': �μ� 7��(��) 'bool'���� 'c10::string_view'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17384): note: 'c10::basic_string_view<char>::basic_string_view': ��� �μ� ������ ��ȯ�� �� �ִ� �����ε�� �Լ��� �����ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\c10/util/string_view.h(56): note: 'c10::basic_string_view<char>::basic_string_view(const c10::basic_string_view<char> &) noexcept'�� �� �ֽ��ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17384): note: 'c10::basic_string_view<char>::basic_string_view(const c10::basic_string_view<char> &) noexcept': �μ� 1��(��) 'bool'���� 'const c10::basic_string_view<char> &'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17384): note: ����: 'bool'���� 'const c10::basic_string_view<char>'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17384): note: ��ȯ�Ϸ��� ��° ����� ���� ��ȯ ������ �Ǵ� �����ڰ� �־�� �մϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\c10/util/string_view.h(53): note: �Ǵ�       'c10::basic_string_view<char>::basic_string_view(const std::basic_string<char,std::char_traits<char>,std::allocator<char>> &)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17384): note: 'c10::basic_string_view<char>::basic_string_view(const std::basic_string<char,std::char_traits<char>,std::allocator<char>> &)': �μ� 1��(��) 'bool'���� 'const std::basic_string<char,std::char_traits<char>,std::allocator<char>> &'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17384): note: ����: 'bool'���� 'const std::basic_string<char,std::char_traits<char>,std::allocator<char>>'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17384): note: ��ȯ�Ϸ��� ��° ����� ���� ��ȯ ������ �Ǵ� �����ڰ� �־�� �մϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\c10/util/string_view.h(50): note: �Ǵ�       'c10::basic_string_view<char>::basic_string_view(const char *)'
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17384): note: 'c10::basic_string_view<char>::basic_string_view(const char *)': �μ� 1��(��) 'bool'���� 'const char *'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17384): note: ���� �迭 ���Ŀ��� ������ �������� ��ȯ�Ϸ��� reinterpret_cast, C ��Ÿ�� ĳ��Ʈ �Ǵ� ��ȣ�� �ִ� �Լ� ��Ÿ�� ĳ��Ʈ�� �ʿ��մϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17384): note: �μ� ��� '(bool)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17384): note: �μ� ��� '(at::Tensor, int64_t, std::optional<int64_t>, std::optional<int64_t>, std::optional<at::Tensor>, bool, bool, bool, bool)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17391): error C2661: 'at::stft': �����ε�� �Լ����� 11���� �μ��� ������� �ʽ��ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(17391): note: �μ� ��� '(at::Tensor, int64_t, std::optional<int64_t>, std::optional<int64_t>, std::optional<at::Tensor>, bool, std::string, bool, bool, bool, bool)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(18456): error C2664: 'at::Tensor &at::upsample_bilinear2d_out(at::Tensor &,const at::Tensor &,at::IntArrayRef,bool,std::optional<double>,std::optional<double>)': �μ� 3��(��) 'std::optional<c10::IntArrayRef>'���� 'at::IntArrayRef'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(18456): note: �� ��ȯ�� ������ �� �ִ� ��� ������ ����� ���� ��ȯ �����ڰ� ���ų� �����ڸ� ȣ���� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/upsample_bilinear2d.h(48): note: 'at::upsample_bilinear2d_out' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(18456): note: �μ� ��� '(at::Tensor, at::Tensor, std::optional<c10::IntArrayRef>, bool, c10::ArrayRef<double>)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(18568): error C2664: 'at::Tensor &at::upsample_nearest2d_out(at::Tensor &,const at::Tensor &,at::IntArrayRef,std::optional<double>,std::optional<double>)': �μ� 3��(��) 'std::optional<c10::IntArrayRef>'���� 'at::IntArrayRef'(��)�� ��ȯ�� �� �����ϴ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(18568): note: �� ��ȯ�� ������ �� �ִ� ��� ������ ����� ���� ��ȯ �����ڰ� ���ų� �����ڸ� ȣ���� �� �����ϴ�.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/ops/upsample_nearest2d.h(48): note: 'at::upsample_nearest2d_out' ������ �����Ͻʽÿ�.
+[torch-sys 0.23.0] libtch/torch_api_generated.cpp(18568): note: �μ� ��� '(at::Tensor, at::Tensor, std::optional<c10::IntArrayRef>, c10::ArrayRef<double>)'��(��) ��ġ��Ű�� ����
+[torch-sys 0.23.0] exit code: 2
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\optional(82): warning C4267: '�ʱ�ȭ ��': 'size_t'���� 'int'(��)�� ��ȯ�ϸ鼭 �����Ͱ� �սǵ� �� �ֽ��ϴ�.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\optional(82): note: ���ø� �ν��Ͻ�ȭ ���ؽ�Ʈ(���� ������ �ν��Ͻ�ȭ ���ؽ�Ʈ)��
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/core/function_schema.h(437): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ 'std::optional<int32_t>::optional<const I,0>(_Ty2 &&) noexcept'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0]         with
+[torch-sys 0.23.0]         [
+[torch-sys 0.23.0]             I=size_t,
+[torch-sys 0.23.0]             _Ty2=size_t
+[torch-sys 0.23.0]         ]
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\ATen/core/function_schema.h(437): note: 'c10::FunctionSchema::argumentIndexWithName'���� 'std::optional<int32_t>::optional'�� ���� ù ��° ������ Ȯ���ϼ���.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\optional(272): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ 'std::_Optional_construct_base<_Ty>::_Optional_construct_base<const unsigned __int64>(std::in_place_t,const unsigned __int64 &&)'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0]         with
+[torch-sys 0.23.0]         [
+[torch-sys 0.23.0]             _Ty=int32_t
+[torch-sys 0.23.0]         ]
+[torch-sys 0.23.0] libtch/torch_api.cpp(1672): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ 'std::_Optional_destruct_base<_Ty,true>::_Optional_destruct_base<const unsigned __int64>(std::in_place_t,const unsigned __int64 &&) noexcept'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0]         with
+[torch-sys 0.23.0]         [
+[torch-sys 0.23.0]             _Ty=int32_t
+[torch-sys 0.23.0]         ]
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(476): warning C4267: '�ʱ�ȭ ��': 'size_t'���� '_Ty'(��)�� ��ȯ�ϸ鼭 �����Ͱ� �սǵ� �� �ֽ��ϴ�.
+[torch-sys 0.23.0]         with
+[torch-sys 0.23.0]         [
+[torch-sys 0.23.0]             _Ty=int
+[torch-sys 0.23.0]         ]
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(476): note: ���ø� �ν��Ͻ�ȭ ���ؽ�Ʈ(���� ������ �ν��Ͻ�ȭ ���ؽ�Ʈ)��
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch/csrc/dynamo/compiled_autograd.h(482): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ 'int &std::vector<int32_t,std::allocator<int>>::emplace_back<size_t&>(size_t &)'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch/csrc/dynamo/compiled_autograd.h(482): note: 'torch::dynamo::autograd::CompiledNodeArgs::add_pre_hook'���� 'std::vector<int32_t,std::allocator<int>>::emplace_back'�� ���� ù ��° ������ Ȯ���ϼ���.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(924): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<size_t&>(size_t &)'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0]         with
+[torch-sys 0.23.0]         [
+[torch-sys 0.23.0]             _Ty=int32_t
+[torch-sys 0.23.0]         ]
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(845): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<size_t&>(size_t &)'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0]         with
+[torch-sys 0.23.0]         [
+[torch-sys 0.23.0]             _Ty=int32_t
+[torch-sys 0.23.0]         ]
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(860): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ 'void std::_Construct_in_place<int,size_t&>(_Ty &,size_t &) noexcept'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0]         with
+[torch-sys 0.23.0]         [
+[torch-sys 0.23.0]             _Ty=int
+[torch-sys 0.23.0]         ]
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(732): warning C4267: '�ʱ�ȭ ��': 'size_t'���� '_Objty'(��)�� ��ȯ�ϸ鼭 �����Ͱ� �սǵ� �� �ֽ��ϴ�.
+[torch-sys 0.23.0]         with
+[torch-sys 0.23.0]         [
+[torch-sys 0.23.0]             _Objty=int
+[torch-sys 0.23.0]         ]
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(732): note: ���ø� �ν��Ͻ�ȭ ���ؽ�Ʈ(���� ������ �ν��Ͻ�ȭ ���ؽ�Ʈ)��
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(848): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ 'int *std::vector<int32_t,std::allocator<int>>::_Emplace_reallocate<size_t&>(int *const ,size_t &)'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(900): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ 'void std::_Default_allocator_traits<_Alloc>::construct<_Ty,size_t&>(_Alloc &,_Objty *const ,size_t &)'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0]         with
+[torch-sys 0.23.0]         [
+[torch-sys 0.23.0]             _Alloc=std::allocator<int>,
+[torch-sys 0.23.0]             _Ty=int,
+[torch-sys 0.23.0]             _Objty=int
+[torch-sys 0.23.0]         ]
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(274): warning C4267: '�ʱ�ȭ ��': 'size_t'���� '_Ty1'(��)�� ��ȯ�ϸ鼭 �����Ͱ� �սǵ� �� �ֽ��ϴ�.
+[torch-sys 0.23.0]         with
+[torch-sys 0.23.0]         [
+[torch-sys 0.23.0]             _Ty1=int
+[torch-sys 0.23.0]         ]
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\utility(274): note: ���ø� �ν��Ͻ�ȭ ���ؽ�Ʈ(���� ������ �ν��Ͻ�ȭ ���ؽ�Ʈ)��
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch/csrc/dynamo/compiled_autograd.h(476): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ 'std::pair<int,int> &std::vector<std::pair<int,int>,std::allocator<std::pair<int,int>>>::emplace_back<size_t&,int&>(size_t &,int &)'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0] C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\include\torch/csrc/dynamo/compiled_autograd.h(476): note: 'torch::dynamo::autograd::CompiledNodeArgs::add_tensor_pre_hook'���� 'std::vector<std::pair<int,int>,std::allocator<std::pair<int,int>>>::emplace_back'�� ���� ù ��° ������ Ȯ���ϼ���.
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(924): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<size_t&,int&>(size_t &,int &)'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0]         with
+[torch-sys 0.23.0]         [
+[torch-sys 0.23.0]             _Ty=std::pair<int,int>
+[torch-sys 0.23.0]         ]
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(845): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<size_t&,int&>(size_t &,int &)'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0]         with
+[torch-sys 0.23.0]         [
+[torch-sys 0.23.0]             _Ty=std::pair<int,int>
+[torch-sys 0.23.0]         ]
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(860): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ 'void std::_Construct_in_place<std::pair<int,int>,size_t&,int&>(_Ty &,size_t &,int &) noexcept'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0]         with
+[torch-sys 0.23.0]         [
+[torch-sys 0.23.0]             _Ty=std::pair<int,int>
+[torch-sys 0.23.0]         ]
+[torch-sys 0.23.0] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(476): note: �����ϵǴ� �Լ� ���ø� �ν��Ͻ�ȭ 'std::pair<int,int>::pair<uint64_t&,int&,0>(_Other1,_Other2) noexcept'�� ���� ������ Ȯ���ϼ���.
+[torch-sys 0.23.0]         with
+[torch-sys 0.23.0]         [
+[torch-sys 0.23.0]             _Other1=uint64_t &,
+[torch-sys 0.23.0]             _Other2=int &
+[torch-sys 0.23.0]         ]
+[torch-sys 0.23.0] cargo:warning=ToolExecError: command did not execute successfully (status code exit code: 2): "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\cl.exe" "-nologo" "-MD" "-O2" "-Brepro" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include\\torch\\csrc\\api\\include" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include\\TH" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include\\THC" "-W0" "/std:c++17" "/p:DefineConstants=GLOG_USE_GLOG_EXPORT" "-FoC:\\Users\\bin9208-1\\workspace\\bin-ru\\RuView\\rust-port\\wifi-densepose-rs\\target\\release\\build\\torch-sys-56edc1097e31eab1\\out\\580bbbcdaf464958-torch_api_generated.o" "-c" "libtch/torch_api_generated.cpp"
+[torch-sys 0.23.0] exit code: 0
+[torch-sys 0.23.0] 
+[torch-sys 0.23.0] 
+[torch-sys 0.23.0] error occurred in cc-rs: command did not execute successfully (status code exit code: 2): "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\cl.exe" "-nologo" "-MD" "-O2" "-Brepro" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include\\torch\\csrc\\api\\include" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include\\TH" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include\\THC" "-W0" "/std:c++17" "/p:DefineConstants=GLOG_USE_GLOG_EXPORT" "-FoC:\\Users\\bin9208-1\\workspace\\bin-ru\\RuView\\rust-port\\wifi-densepose-rs\\target\\release\\build\\torch-sys-56edc1097e31eab1\\out\\580bbbcdaf464958-torch_api_generated.o" "-c" "libtch/torch_api_generated.cpp"
+[torch-sys 0.23.0] 
+[torch-sys 0.23.0] 
+warning: torch-sys@0.23.0: cl : ������ warning D9002 : �� �� ���� '/p:DefineConstants=GLOG_USE_GLOG_EXPORT' �ɼ��� �����մϴ�.
+warning: torch-sys@0.23.0: cl : ������ warning D9002 : �� �� ���� '/p:DefineConstants=GLOG_USE_GLOG_EXPORT' �ɼ��� �����մϴ�.
+warning: torch-sys@0.23.0: cl : ������ warning D9002 : �� �� ���� '/p:DefineConstants=GLOG_USE_GLOG_EXPORT' �ɼ��� �����մϴ�.
+warning: torch-sys@0.23.0: cl : ������ warning D9002 : �� �� ���� '/p:DefineConstants=GLOG_USE_GLOG_EXPORT' �ɼ��� �����մϴ�.
+warning: torch-sys@0.23.0: ToolExecError: command did not execute successfully (status code exit code: 2): "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\cl.exe" "-nologo" "-MD" "-O2" "-Brepro" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include\\torch\\csrc\\api\\include" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include\\TH" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include\\THC" "-W0" "/std:c++17" "/p:DefineConstants=GLOG_USE_GLOG_EXPORT" "-FoC:\\Users\\bin9208-1\\workspace\\bin-ru\\RuView\\rust-port\\wifi-densepose-rs\\target\\release\\build\\torch-sys-56edc1097e31eab1\\out\\580bbbcdaf464958-torch_api_generated.o" "-c" "libtch/torch_api_generated.cpp"
+error: failed to run custom build command for `torch-sys v0.23.0 (https://github.com/LaurentMazare/tch-rs.git#b1541a2a)`
+
+Caused by:
+  process didn't exit successfully: `set CARGO=C:\Users\bin9208-1\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin\cargo.exe&& set CARGO_CFG_FEATURE=""&& set CARGO_CFG_PANIC=unwind&& set CARGO_CFG_TARGET_ABI=""&& set CARGO_CFG_TARGET_ARCH=x86_64&& set CARGO_CFG_TARGET_ENDIAN=little&& set CARGO_CFG_TARGET_ENV=msvc&& set CARGO_CFG_TARGET_FAMILY=windows&& set CARGO_CFG_TARGET_FEATURE=cmpxchg16b,fxsr,sse,sse2,sse3&& set CARGO_CFG_TARGET_HAS_ATOMIC=128,16,32,64,8,ptr&& set CARGO_CFG_TARGET_OS=windows&& set CARGO_CFG_TARGET_POINTER_WIDTH=64&& set CARGO_CFG_TARGET_VENDOR=pc&& set CARGO_CFG_WINDOWS=""&& set CARGO_ENCODED_RUSTFLAGS=""&& set CARGO_MANIFEST_DIR=C:\Users\bin9208-1\.cargo\git\checkouts\tch-rs-a202272c5de761c5\b1541a2\torch-sys&& set CARGO_MANIFEST_LINKS=tch&& set CARGO_MANIFEST_PATH=C:\Users\bin9208-1\.cargo\git\checkouts\tch-rs-a202272c5de761c5\b1541a2\torch-sys\Cargo.toml&& set CARGO_PKG_AUTHORS="Laurent Mazare <lmazare@gmail.com>"&& set CARGO_PKG_DESCRIPTION="Low-level FFI bindings for the PyTorch C++ api (libtorch)."&& set CARGO_PKG_HOMEPAGE=""&& set CARGO_PKG_LICENSE=MIT/Apache-2.0&& set CARGO_PKG_LICENSE_FILE=""&& set CARGO_PKG_NAME=torch-sys&& set CARGO_PKG_README=""&& set CARGO_PKG_REPOSITORY=https://github.com/LaurentMazare/tch-rs&& set CARGO_PKG_RUST_VERSION=""&& set CARGO_PKG_VERSION=0.23.0&& set CARGO_PKG_VERSION_MAJOR=0&& set CARGO_PKG_VERSION_MINOR=23&& set CARGO_PKG_VERSION_PATCH=0&& set CARGO_PKG_VERSION_PRE=""&& set DEBUG=false&& set HOST=x86_64-pc-windows-msvc&& set NUM_JOBS=32&& set OPT_LEVEL=3&& set OUT_DIR=C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release\build\torch-sys-56edc1097e31eab1\out&& set PATH="C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release;C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release\deps;C:\Users\bin9208-1\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib;C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\lib;C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\bin\x64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\NVIDIA Corporation\NVIDIA app\NvDLISR;C:\Program Files\dotnet\;C:\Program Files\Bandizip\;C:\Program Files\PuTTY\;C:\Program Files\Cloudflare\Cloudflare WARP\;C:\Program Files\Mullvad VPN\resources;C:\Program Files\Git\cmd;C:\Program Files\nodejs\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\NVIDIA Corporation\Nsight Compute 2026.1.0\;C:\Users\bin9208-1\.cargo\bin;C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\Scripts\;C:\Users\bin9208-1\AppData\Local\Programs\Python\Python312\;C:\Users\bin9208-1\AppData\Local\Microsoft\WindowsApps;C:\Program Files (x86)\SVP 4\mpv64;C:\Users\bin9208-1\AppData\Roaming\npm;C:\Users\bin9208-1\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\bin9208-1\Documents\sdk\flutter\bin;C:\Users\bin9208-1\AppData\Local\Android\Sdk\cmdline-tools\latest\bin;C:\Users\bin9208-1\AppData\Local\Android\Sdk\platform-tools;C:\Users\bin9208-1\AppData\Local\Android\Sdk\emulator;C:\Users\bin9208-1\AppData\Local\Programs\Antigravity\bin;C:\Users\bin9208-1\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin;C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release\build\bzip2-sys-03b22c3d41d3558f\out\lib;C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release\build\zstd-sys-9e1db9d4b218c6dc\out"&& set PROFILE=release&& set RUSTC=C:\Users\bin9208-1\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin\rustc.exe&& set RUSTDOC=C:\Users\bin9208-1\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin\rustdoc.exe&& set TARGET=x86_64-pc-windows-msvc&& C:\Users\bin9208-1\workspace\bin-ru\RuView\rust-port\wifi-densepose-rs\target\release\build\torch-sys-e0157a0f9878405a\build-script-build` (exit code: 1)
+  --- stderr
+
+
+  error occurred in cc-rs: command did not execute successfully (status code exit code: 2): "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\cl.exe" "-nologo" "-MD" "-O2" "-Brepro" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include\\torch\\csrc\\api\\include" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include\\TH" "-I" "C:\\Users\\bin9208-1\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\torch\\include\\THC" "-W0" "/std:c++17" "/p:DefineConstants=GLOG_USE_GLOG_EXPORT" "-FoC:\\Users\\bin9208-1\\workspace\\bin-ru\\RuView\\rust-port\\wifi-densepose-rs\\target\\release\\build\\torch-sys-56edc1097e31eab1\\out\\580bbbcdaf464958-torch_api_generated.o" "-c" "libtch/torch_api_generated.cpp"
+
+

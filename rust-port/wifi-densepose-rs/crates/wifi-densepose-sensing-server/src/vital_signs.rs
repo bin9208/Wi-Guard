@@ -21,7 +21,7 @@ const BREATHING_MIN_HZ: f64 = 0.1; // 6 BPM
 const BREATHING_MAX_HZ: f64 = 0.5; // 30 BPM
 
 /// Heart rate physiological band: 40-120 beats per minute.
-const HEARTBEAT_MIN_HZ: f64 = 0.667; // 40 BPM
+const HEARTBEAT_MIN_HZ: f64 = 0.8; // 48 BPM
 const HEARTBEAT_MAX_HZ: f64 = 2.0; // 120 BPM
 
 /// Minimum number of samples before attempting extraction.
@@ -147,19 +147,7 @@ impl VitalSignDetector {
                 .sum::<f64>()
                 / phase.len() as f64
         } else {
-            // Fallback: use amplitude high-pass residual when phase is unavailable
-            let half = amplitude.len() / 2;
-            if half > 0 {
-                let hi_mean: f64 =
-                    amplitude[half..].iter().sum::<f64>() / (amplitude.len() - half) as f64;
-                amplitude[half..]
-                    .iter()
-                    .map(|a| (a - hi_mean).powi(2))
-                    .sum::<f64>()
-                    / (amplitude.len() - half) as f64
-            } else {
-                0.0
-            }
+            0.0 // No phase data, no heartbeat detection possible.
         };
 
         self.heartbeat_buffer.push_back(phase_var);

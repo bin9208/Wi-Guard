@@ -69,8 +69,9 @@ export class DashboardTab {
       this.updateDataSourceIndicator();
     });
     // Also update on data — catches source changes mid-stream
-    this._sensingDataUnsub = sensingService.onData(() => {
+    this._sensingDataUnsub = sensingService.onData((data) => {
       this.updateDataSourceIndicator();
+      this.updateNodeGrid(data);
     });
     // Initial update
     this.updateDataSourceIndicator();
@@ -101,6 +102,57 @@ export class DashboardTab {
     el.className = `component-status status-${cfg.status}`;
     if (statusText) statusText.textContent = cfg.text;
     if (statusMsg)  statusMsg.textContent = cfg.msg;
+  }
+
+  // Update the Node Status Grid UI (6 nodes)
+  updateNodeGrid(data) {
+    if (!data || !data.nodes) return;
+
+    let onlineCount = 0;
+    
+    // data.nodes represents all currently online ESP32-S3 nodes
+    const nodeGrid = this.container.querySelector('#node-grid');
+    if (!nodeGrid) return;
+
+    const cards = nodeGrid.querySelectorAll('.node-card');
+    cards.forEach(card => {
+      const idx = parseInt(card.getAttribute('data-node'));
+      const nodeId = idx + 1; // Map html index (0-5) to Node ID (1-6)
+      
+      const nodeData = data.nodes.find(n => n.node_id === nodeId);
+      const dot = card.querySelector('.node-status-dot');
+      
+      if (nodeData) {
+        onlineCount++;
+        card.classList.add('online');
+        if (dot) {
+          dot.classList.remove('offline');
+          dot.classList.add('online');
+        }
+        
+        const rssiEl = card.querySelector('.node-rssi');
+        const ampEl = card.querySelector('.node-amp');
+        const scEl = card.querySelector('.node-sc');
+        const seqEl = card.querySelector('.node-seq-val');
+        
+        if (rssiEl) rssiEl.textContent = (nodeData.rssi_dbm !== undefined && nodeData.rssi_dbm !== null ? nodeData.rssi_dbm : -80).toFixed(1) + ' dBm';
+        if (ampEl) {
+          const hasAmp = nodeData.amplitude && nodeData.amplitude.length > 0;
+          ampEl.textContent = hasAmp ? 'OK' : '--';
+        }
+        if (scEl) scEl.textContent = nodeData.subcarrier_count || '--';
+        if (seqEl) seqEl.textContent = data.tick || '--';
+      } else {
+        card.classList.remove('online');
+        if (dot) {
+          dot.classList.remove('online');
+          dot.classList.add('offline');
+        }
+      }
+    });
+
+    const countEl = this.container.querySelector('#online-count');
+    if (countEl) countEl.textContent = onlineCount.toString();
   }
 
   // Update API info display

@@ -2,13 +2,13 @@
 //!
 //! This crate provides neural network inference capabilities for the WiFi-DensePose
 //! pose estimation system. It supports multiple backends including ONNX Runtime,
-//! tch-rs (PyTorch), and Candle for flexible deployment.
+//! torch-rs (PyTorch), and Candle for flexible deployment.
 //!
 //! ## Features
 //!
 //! - **DensePose Head**: Body part segmentation and UV coordinate regression
 //! - **Modality Translator**: CSI to visual feature space translation
-//! - **Multi-Backend Support**: ONNX, PyTorch (tch), and Candle backends
+//! - **Multi-Backend Support**: ONNX, PyTorch (torch), and Candle backends
 //! - **Inference Optimization**: Batching, GPU acceleration, and model caching
 //!
 //! ## Example

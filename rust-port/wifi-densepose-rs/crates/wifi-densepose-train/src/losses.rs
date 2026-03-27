@@ -20,7 +20,16 @@
 //! No synthetic or random tensors are generated at runtime.
 
 use std::collections::HashMap;
-use tch::{Kind, Reduction, Tensor};
+use torch::{Kind, Reduction, Tensor};
+
+fn safe_double_value(t: &Tensor) -> f64 {
+    let finite = t.isfinite().all();
+    if finite.int64_value(&[]) != 0 {
+        t.double_value(&[])
+    } else {
+        0.0
+    }
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Public types
@@ -107,18 +116,34 @@ impl WiFiDensePoseLoss {
         target_heatmaps: &Tensor,
         visibility: &Tensor,
     ) -> Tensor {
-        // Pixel-wise squared error, mean-reduced over H and W: [B, 17]
+        // ── Focal-Weighted MSE ──────────────────────────────────────
+        // Problem: plain MSE is dominated by 48×48=2304 background pixels
+        // that are all 0. The model gets rewarded for "predict nothing".
+        //
+        // Solution: weight each pixel by (1 + α * target_value).
+        // Background (target=0) → weight 1.0 (baseline)
+        // Joint peak (target=1) → weight 1+α = 6.0 (5× extra emphasis)
+        // This forces the model to actually place the Gaussian bumps.
+        let alpha = 5.0;
+        let weight_map = target_heatmaps * alpha + 1.0; // [B, 17, H, W]
+
         let sq_err = (pred_heatmaps - target_heatmaps).pow_tensor_scalar(2);
-        // Mean over H and W (dims 2, 3 → we flatten them first for clarity)
-        let per_joint_mse = sq_err.mean_dim(&[2_i64, 3_i64][..], false, Kind::Float);
+        let weighted_err = &sq_err * &weight_map;
+
+        // Sum over H, W then normalise by sum of weights (not pixel count)
+        let per_joint_loss = weighted_err
+            .sum_dim_intlist(Some([2_i64, 3_i64].as_slice()), false, Kind::Float)
+            / weight_map
+                .sum_dim_intlist(Some([2_i64, 3_i64].as_slice()), false, Kind::Float)
+                .clamp(1.0, 1e12);
+        // per_joint_loss: [B, 17]
 
         // Mask by visibility: [B, 17]
-        let masked = per_joint_mse * visibility;
+        let masked = per_joint_loss * visibility;
 
         // Normalise by number of visible joints in the batch.
         let n_visible = visibility.sum(Kind::Float);
-        // Guard against division by zero (entire batch may have no labels).
-        let safe_n = n_visible.clamp(1.0, f64::MAX);
+        let safe_n = n_visible.clamp(1.0, 1e12);
 
         masked.sum(Kind::Float) / safe_n
     }
@@ -149,7 +174,7 @@ impl WiFiDensePoseLoss {
         target_uv: &Tensor,
     ) -> Tensor {
         // ── 1. Part classification: cross-entropy ──────────────────────────
-        // tch cross_entropy_loss expects (input: [B,C,…], target: [B,…] of i64).
+        // torch cross_entropy_loss expects (input: [B,C,…], target: [B,…] of i64).
         let target_int = target_parts.to_kind(Kind::Int64);
         // weight=None, reduction=Mean, ignore_index=-100, label_smoothing=0.0
         let part_loss = pred_parts.cross_entropy_loss::<Tensor>(
@@ -226,7 +251,7 @@ impl WiFiDensePoseLoss {
 
         // ── Keypoint loss (always computed) ───────────────────────────────
         let kp_loss = self.keypoint_loss(pred_keypoints, target_keypoints, visibility);
-        let kp_val: f64 = kp_loss.double_value(&[]);
+        let kp_val: f64 = safe_double_value(&kp_loss);
         details.insert("kp_mse".to_string(), kp_val as f32);
 
         let total = kp_loss.shallow_clone() * self.weights.lambda_kp;
@@ -243,7 +268,7 @@ impl WiFiDensePoseLoss {
                     -100,
                     0.0,
                 );
-                let part_val = part_loss.double_value(&[]) as f32;
+                let part_val = safe_double_value(&part_loss) as f32;
 
                 // UV loss (foreground masked)
                 let fg_mask = target_int.not_equal(0_i64);
@@ -251,14 +276,14 @@ impl WiFiDensePoseLoss {
                     .unsqueeze(1)
                     .expand_as(pu)
                     .to_kind(Kind::Float);
-                let n_fg = fg_mask_f.sum(Kind::Float).clamp(1.0, f64::MAX);
+                let n_fg = fg_mask_f.sum(Kind::Float).clamp(1.0, 1e12);
                 let uv_loss = (pu * &fg_mask_f)
                     .smooth_l1_loss(&(tu * &fg_mask_f), Reduction::Sum, 1.0)
                     / n_fg;
-                let uv_val = uv_loss.double_value(&[]) as f32;
+                let uv_val = safe_double_value(&uv_loss) as f32;
 
                 let dp_loss = &part_loss + &uv_loss;
-                let dp_scalar = dp_loss.double_value(&[]) as f32;
+                let dp_scalar = safe_double_value(&dp_loss) as f32;
 
                 details.insert("dp_part_ce".to_string(), part_val);
                 details.insert("dp_uv_smooth_l1".to_string(), uv_val);
@@ -273,7 +298,7 @@ impl WiFiDensePoseLoss {
         let (tr_val, total) = match (student_features, teacher_features) {
             (Some(sf), Some(tf)) => {
                 let tr_loss = self.transfer_loss(sf, tf);
-                let tr_scalar = tr_loss.double_value(&[]) as f32;
+                let tr_scalar = safe_double_value(&tr_loss) as f32;
                 details.insert("transfer_mse".to_string(), tr_scalar);
                 let new_total = total + tr_loss * self.weights.lambda_tr;
                 (Some(tr_scalar), new_total)
@@ -281,7 +306,8 @@ impl WiFiDensePoseLoss {
             _ => (None, total),
         };
 
-        let total_val = total.double_value(&[]) as f32;
+        // total.print(); // Remove debug print
+        let total_val = safe_double_value(&total) as f32;
 
         let output = WiFiLossComponents {
             total: total_val,
@@ -495,7 +521,7 @@ pub fn compute_losses(
         total_t = total_t + tr * lambda_tr;
     }
 
-    let total: f64 = total_t.double_value(&[]);
+    let total: f64 = safe_double_value(&total_t);
 
     LossOutput {
         total,
@@ -778,8 +804,8 @@ mod tests {
     // ── Loss functions ────────────────────────────────────────────────────────
 
     /// Returns a CUDA-or-CPU device string: always "cpu" in CI.
-    fn device() -> tch::Device {
-        tch::Device::Cpu
+    fn device() -> torch::Device {
+        torch::Device::Cpu
     }
 
     #[test]

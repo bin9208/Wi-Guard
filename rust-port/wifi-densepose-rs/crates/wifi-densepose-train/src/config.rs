@@ -48,7 +48,7 @@ pub struct TrainingConfig {
     /// already matches the target count. Default: **114**.
     pub native_subcarriers: usize,
 
-    /// Number of transmit antennas. Default: **3**.
+    /// Number of transmit antennas. Default: **1**.
     pub num_antennas_tx: usize,
 
     /// Number of receive antennas. Default: **3**.
@@ -100,6 +100,28 @@ pub struct TrainingConfig {
 
     /// Maximum gradient L2 norm for gradient clipping. Default: **1.0**.
     pub grad_clip_norm: f64,
+
+    /// Use cosine annealing with warm restarts instead of plain cosine decay.
+    /// Default: **true**.
+    pub use_warm_restarts: bool,
+
+    /// Cosine annealing warm-restart period (T_0) in epochs. Default: **30**.
+    pub cosine_t0: usize,
+
+    /// Cosine annealing period multiplier (T_mult). Default: **2**.
+    pub cosine_t_mult: usize,
+
+    /// Heatmap target Gaussian sigma in pixels. Default: **4.0**.
+    ///
+    /// Wider sigma makes the heatmap targets easier to learn from noisy CSI.
+    pub heatmap_sigma: f64,
+
+    /// Mixup augmentation probability during training. Default: **0.3**.
+    /// Set to 0.0 to disable mixup.
+    pub mixup_prob: f64,
+
+    /// Mixup Beta distribution alpha parameter. Default: **0.4**.
+    pub mixup_alpha: f64,
 
     // -----------------------------------------------------------------------
     // Loss weights
@@ -160,7 +182,7 @@ impl Default for TrainingConfig {
             // Data
             num_subcarriers: 56,
             native_subcarriers: 114,
-            num_antennas_tx: 3,
+            num_antennas_tx: 1,
             num_antennas_rx: 3,
             window_frames: 100,
             heatmap_size: 56,
@@ -169,28 +191,34 @@ impl Default for TrainingConfig {
             num_body_parts: 24,
             backbone_channels: 256,
             // Optimisation
-            batch_size: 8,
-            learning_rate: 1e-3,
+            batch_size: 32,
+            learning_rate: 3e-4,
             weight_decay: 1e-4,
-            num_epochs: 50,
-            warmup_epochs: 5,
-            lr_milestones: vec![30, 45],
+            num_epochs: 200,
+            warmup_epochs: 3,
+            lr_milestones: vec![100, 150],
             lr_gamma: 0.1,
             grad_clip_norm: 1.0,
+            use_warm_restarts: true,
+            cosine_t0: 50,
+            cosine_t_mult: 1,
+            heatmap_sigma: 4.0,
+            mixup_prob: 0.3,
+            mixup_alpha: 0.4,
             // Loss weights
             lambda_kp: 0.3,
             lambda_dp: 0.6,
             lambda_tr: 0.1,
             // Validation / checkpointing
             val_every_epochs: 1,
-            early_stopping_patience: 10,
+            early_stopping_patience: 20,
             checkpoint_dir: PathBuf::from("checkpoints"),
             log_dir: PathBuf::from("logs"),
             save_top_k: 3,
             // Device
-            use_gpu: false,
+            use_gpu: true,
             gpu_device_id: 0,
-            num_workers: 4,
+            num_workers: 8,
             // Reproducibility
             seed: 42,
         }
@@ -487,14 +515,14 @@ mod tests {
         let cfg = TrainingConfig::default();
         assert_eq!(cfg.num_subcarriers, 56);
         assert_eq!(cfg.native_subcarriers, 114);
-        assert_eq!(cfg.num_antennas_tx, 3);
+        assert_eq!(cfg.num_antennas_tx, 1);
         assert_eq!(cfg.num_antennas_rx, 3);
         assert_eq!(cfg.window_frames, 100);
         assert_eq!(cfg.heatmap_size, 56);
         assert_eq!(cfg.num_keypoints, 17);
         assert_eq!(cfg.num_body_parts, 24);
         assert_eq!(cfg.batch_size, 8);
-        assert!((cfg.learning_rate - 1e-3).abs() < 1e-10);
+        assert!((cfg.learning_rate - 5e-4).abs() < 1e-10);
         assert_eq!(cfg.num_epochs, 50);
         assert_eq!(cfg.warmup_epochs, 5);
         assert_eq!(cfg.lr_milestones, vec![30, 45]);
@@ -503,5 +531,11 @@ mod tests {
         assert!((cfg.lambda_dp - 0.6).abs() < 1e-10);
         assert!((cfg.lambda_tr - 0.1).abs() < 1e-10);
         assert_eq!(cfg.seed, 42);
+        assert!(cfg.use_warm_restarts);
+        assert_eq!(cfg.cosine_t0, 30);
+        assert_eq!(cfg.cosine_t_mult, 2);
+        assert!((cfg.heatmap_sigma - 4.0).abs() < 1e-10);
+        assert!((cfg.mixup_prob - 0.3).abs() < 1e-10);
+        assert!((cfg.mixup_alpha - 0.4).abs() < 1e-10);
     }
 }

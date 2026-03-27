@@ -237,7 +237,7 @@ fn main() {
                     println!();
                     println!("  Possible causes:");
                     println!("    - Code change (model architecture, loss, data pipeline)");
-                    println!("    - Library version change (tch, ndarray)");
+                    println!("    - Library version change (torch, ndarray)");
                     println!("    - Non-determinism was introduced");
                     println!();
                     println!("  If the change is intentional, regenerate the hash:");

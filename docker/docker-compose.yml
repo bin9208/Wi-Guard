@@ -32,3 +32,24 @@ services:
       - "8080:8080"   # UI
     environment:
       - PYTHONUNBUFFERED=1
+
+  # ── Sensing REST API ─────────────────────────────────────────────
+  # 모바일 앱 / 외부 시스템용 REST API 서버
+  # Swagger UI: http://localhost:8000/docs
+  sensing-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    image: ruvnet/wifi-densepose:api
+    ports:
+      - "8000:8000"    # FastAPI REST API + Swagger docs
+      - "8766:8765"    # WebSocket sensing (mapped to avoid conflict)
+    environment:
+      - PYTHONUNBUFFERED=1
+      - CSI_SOURCE=${CSI_SOURCE:-auto}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/sensing/current"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped

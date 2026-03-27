@@ -8,10 +8,10 @@
 //! `generate_expected_hash`) are marked `#[ignore]` so they compile and
 //! document the expected API without failing CI until the implementation lands.
 //!
-//! This entire module is gated behind `tch-backend` because the `proof`
+//! This entire module is gated behind `torch-backend` because the `proof`
 //! module is only compiled when that feature is enabled.
 
-#[cfg(feature = "tch-backend")]
+#[cfg(feature = "torch-backend")]
 mod tch_proof_tests {
 
 use tempfile::TempDir;

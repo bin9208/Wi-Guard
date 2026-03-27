@@ -145,7 +145,7 @@ fn bench_config_validate(c: &mut Criterion) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PCK computation benchmark (pure Rust, no tch dependency)
+// PCK computation benchmark (pure Rust, no torch dependency)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Inline PCK@threshold computation for a single (pred, gt) sample.
@@ -223,7 +223,7 @@ criterion_group!(
     bench_synthetic_epoch,
     // Config
     bench_config_validate,
-    // Metrics (pure Rust, no tch)
+    // Metrics (pure Rust, no torch)
     bench_pck_100_samples,
 );
 criterion_main!(benches);
