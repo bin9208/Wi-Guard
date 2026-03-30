@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuView — WiFi DensePose v0.5.1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-root">
+    <!-- Premium Backdrop -->
+    <div class="mesh-background"></div>
+    
+    <div class="app-shell">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">π</div>
+                    <div class="logo-text">RuView</div>
+                </div>
+                <div class="version-tag">v0.5.1-6N</div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-view="dashboard">
+                    <span class="icon">📊</span><span class="label">대시보드</span>
+                </button>
+                <button class="nav-item" data-view="mesh">
+                    <span class="icon">🕸️</span><span class="label">메쉬 네트워크</span>
+                </button>
+                <button class="nav-item" data-view="analytics">
+                    <span class="icon">📈</span><span class="label">신호 분석</span>
+                </button>
+                <button class="nav-item" data-view="settings">
+                    <span class="icon">⚙️</span><span class="label">설정</span>
+                </button>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="server-status-pill healthy">
+                    <span class="dot"></span>
+                    <span class="text">Server Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1 id="view-title">시스템 통합 대시보드</h1>
+                </div>
+                <div class="topbar-right">
+                    <div class="model-selector-wrapper">
+                        <select id="model-select" class="premium-select">
+                            <option value="">모델 로딩 중...</option>
+                        </select>
+                        <button id="load-model-btn" class="btn btn-apply">적용</button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard View -->
+            <div id="view-dashboard" class="content-view active">
+                <div class="dashboard-grid">
+                    <!-- Central Pose Viewer (Large) -->
+                    <div class="card card-pose glass">
+                        <div class="card-header">
+                            <h3><span class="icon">🦴</span> 실시간 통합 포즈 추정</h3>
+                            <div class="card-actions">
+                                <span class="badge badge-cyan" id="fps-display">-- FPS</span>
+                                <span class="badge badge-purple" id="confidence-display">Conf: --%</span>
+                            </div>
+                        </div>
+                        <div class="pose-canvas-wrapper">
+                            <canvas id="skeleton-canvas"></canvas>
+                            <div class="pose-overlay">
+                                <div class="fusion-quality">
+                                    <label>퓨전 품질</label>
+                                    <div class="quality-bar"><div class="fill" id="fused-quality-bar" style="width: 0%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Side Panel: Node Status (Grid inside card) -->
+                    <div class="card card-nodes glass">
+                        <div class="card-header">
+                            <h3><span class="icon">📡</span> 분산 노드 상태 (6 Nodes)</h3>
+                            <span class="node-counter"><b id="online-count">0</b> / 6 Active</span>
+                        </div>
+                        <div class="node-grid" id="node-grid">
+                            <!-- Nodes 1-6 -->
+                            <div class="mini-node-card offline" data-node-id="1">
+                                <div class="node-head">
+                                    <span class="name">Node 1</span>
+                                    <span class="pos">FL</span>
+                                </div>
+                                <canvas class="mini-sparkline" width="100" height="30"></canvas>
+                                <div class="rssi-val">-- dBm</div>
+                            </div>
+                            <div class="mini-node-card offline" data-node-id="2">
+                                <div class="node-head">
+                                    <span class="name">Node 2</span>
+                                    <span class="pos">FR</span>
+                                </div>
+                                <canvas class="mini-sparkline" width="100" height="30"></canvas>
+                                <div class="rssi-val">-- dBm</div>
+                            </div>
+                            <div class="mini-node-card offline" data-node-id="3">
+                                <div class="node-head">
+                                    <span class="name">Node 3</span>
+                                    <span class="pos">CL</span>
+                                </div>
+                                <canvas class="mini-sparkline" width="100" height="30"></canvas>
+                                <div class="rssi-val">-- dBm</div>
+                            </div>
+                            <div class="mini-node-card offline" data-node-id="4">
+                                <div class="node-head">
+                                    <span class="name">Node 4</span>
+                                    <span class="pos">CR</span>
+                                </div>
+                                <canvas class="mini-sparkline" width="100" height="30"></canvas>
+                                <div class="rssi-val">-- dBm</div>
+                            </div>
+                            <div class="mini-node-card offline" data-node-id="5">
+                                <div class="node-head">
+                                    <span class="name">Node 5</span>
+                                    <span class="pos">BL</span>
+                                </div>
+                                <canvas class="mini-sparkline" width="100" height="30"></canvas>
+                                <div class="rssi-val">-- dBm</div>
+                            </div>
+                            <div class="mini-node-card offline" data-node-id="6">
+                                <div class="node-head">
+                                    <span class="name">Node 6</span>
+                                    <span class="pos">BR</span>
+                                </div>
+                                <canvas class="mini-sparkline" width="100" height="30"></canvas>
+                                <div class="rssi-val">-- dBm</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Panel: Vital Signs -->
+                    <div class="card card-vitals glass">
+                        <div class="card-header">
+                            <h3><span class="icon">💓</span> 오라클 바이탈 통합 모니터링</h3>
+                        </div>
+                        <div class="vitals-container">
+                            <div class="vitals-orb">
+                                <svg class="orb-svg" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="45" class="orb-bg" />
+                                    <circle cx="50" cy="50" r="45" class="orb-fill" id="orb-pulse" />
+                                </svg>
+                                <div class="orb-value" id="heart-rate">--</div>
+                                <div class="orb-label">BPM</div>
+                            </div>
+                            <div class="vitals-stats">
+                                <div class="v-stat">
+                                    <label>호흡수 (RR)</label>
+                                    <div class="val" id="resp-rate">-- <small>rpm</small></div>
+                                </div>
+                                <div class="v-stat">
+                                    <label>스트레스 지수</label>
+                                    <div class="val" id="stress-level">--</div>
+                                </div>
+                            </div>
+                            <div class="vitals-chart">
+                                <canvas id="vitals-wave-canvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats & System Panel -->
+                    <div class="card card-system glass">
+                        <div class="card-header">
+                            <h3><span class="icon">💻</span> 시스템 자원</h3>
+                        </div>
+                        <div class="sys-metrics">
+                            <div class="sys-item">
+                                <div class="label">CPU Usage</div>
+                                <div class="progress"><div class="fill" id="cpu-fill" style="width: 0%"></div></div>
+                                <div class="val" id="cpu-val">0%</div>
+                            </div>
+                            <div class="sys-item">
+                                <div class="label">Memory (Torch)</div>
+                                <div class="progress"><div class="fill" id="mem-fill" style="width: 0%"></div></div>
+                                <div class="val" id="mem-val">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Toast Notifications Area -->
+            <div id="toast-container"></div>
+        </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
+   <span>ESP32-S3 × 6</span>
+    </footer>
+
+    <!-- Load application scripts as modules -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>

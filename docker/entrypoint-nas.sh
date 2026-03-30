@@ -25,9 +25,23 @@ nginx
 
 # Start Rust sensing server (foreground)
 echo "[2/2] Starting Rust sensing server..."
-exec /app/sensing-server \
-    --source "${CSI_SOURCE:-esp32}" \
-    --tick-ms 100 \
-    --ui-path /app/ui \
-    --http-port 3000 \
-    --ws-port 3001
+
+CHECKPOINT=$(ls /app/checkpoint/*.safetensors /app/checkpoint/*.pt 2>/dev/null | head -1)
+if [ -n "$CHECKPOINT" ]; then
+    echo "  Model: $CHECKPOINT"
+    exec /app/sensing-server \
+        --source "${CSI_SOURCE:-esp32}" \
+        --tick-ms 100 \
+        --ui-path /app/ui \
+        --http-port 3000 \
+        --ws-port 3001 \
+        --model-checkpoint "$CHECKPOINT"
+else
+    echo "  [WARN] No checkpoint found in /app/checkpoint/ — pose data will be empty"
+    exec /app/sensing-server \
+        --source "${CSI_SOURCE:-esp32}" \
+        --tick-ms 100 \
+        --ui-path /app/ui \
+        --http-port 3000 \
+        --ws-port 3001
+fi

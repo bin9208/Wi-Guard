@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  wi-guard:
+    build: .
+    image: wi-guard:latest
+    container_name: wi-guard
+    # ESP32의 UDP 패킷을 지연 없이 직접 수신하기 위해 호스트 네트워크 모드 사용
+    network_mode: "host"
+    volumes:
+      # 이미지 내부에 체크포인트가 포함되어 있으나, 외부에서 수정/업데이트 가능하도록 마운트
+      - ./checkpoint:/app/checkpoint
+    command: >
+      --model-checkpoint /app/checkpoint/best_epoch0036_pck0.8908.safetensors 
+      --source esp32
+    restart: unless-stopped

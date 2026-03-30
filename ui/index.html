@@ -3,300 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RuView — WiFi DensePose by bin9208</title>
-    <meta name="description" content="WiFi-based human pose estimation and vital sign monitoring system by bin9208">
+    <title>RuView — WiFi DensePose</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
+    <div class="app">
         <!-- Header -->
-        <header class="header" id="main-header">
+        <header class="header">
             <div class="header-left">
                 <div class="logo">
-                    <span class="logo-icon">π</span>
+                    <div class="logo-mark">R</div>
                     <span class="logo-text">RuView</span>
                 </div>
-                <span class="header-divider"></span>
-                <span class="header-badge">by bin9208</span>
+                <div class="conn-pill" id="conn-status">
+                    <span class="conn-dot"></span>
+                    <span class="conn-label">연결 중...</span>
+                </div>
             </div>
             <div class="header-right">
-                <div class="header-info">
-                    <span class="api-version"></span>
-                    <span class="api-environment"></span>
-                    <span class="overall-health"></span>
-                </div>
-                <div class="connection-indicator" id="connection-status">
-                    <span class="conn-dot"></span>
-                    <span class="conn-label">연결 대기</span>
-                </div>
+                <button id="btn-record" class="btn-record" title="CSI 데이터 녹화">REC</button>
+                <span id="rec-timer" class="rec-timer" style="display:none">00:00</span>
+                <select id="model-select" class="select-model">
+                    <option value="">모델 선택</option>
+                </select>
+                <button id="btn-load-model" class="btn-primary">로드</button>
             </div>
         </header>
 
-        <!-- Navigation -->
-        <nav class="nav-tabs" id="main-nav">
-            <button class="nav-tab active" data-tab="dashboard">
-                <span class="nav-icon">📡</span>
-                <span class="nav-label">노드 상태</span>
-            </button>
-            <a href="pose-fusion.html" class="nav-tab" style="text-decoration:none">
-                <span class="nav-icon">🦴</span>
-                <span class="nav-label">라이브 포즈</span>
-            </a>
-            <a href="observatory.html" class="nav-tab" style="text-decoration:none">
-                <span class="nav-icon">💓</span>
-                <span class="nav-label">바이탈 사인</span>
-            </a>
-            <button class="nav-tab" data-tab="training">
-                <span class="nav-icon">🧠</span>
-                <span class="nav-label">모델 학습</span>
-            </button>
-        </nav>
-
-        <!-- Dashboard / Node Status Tab (Default) -->
-        <section id="dashboard" class="tab-content active">
-            <!-- Error container -->
-            <div class="error-container" style="display: none;"></div>
-
-            <!-- Node Status Grid for 6 ESP32-S3 -->
-            <div class="section-header">
-                <h2>ESP32-S3 노드 상태</h2>
-                <span class="node-count-badge"><span id="online-count">0</span> / 6 온라인</span>
-            </div>
-
-            <div class="node-grid" id="node-grid">
-                <div class="node-card" data-node="0">
-                    <div class="node-status-dot offline"></div>
-                    <div class="node-info">
-                        <div class="node-name">Node 0</div>
-                        <div class="node-position">Front-Left</div>
-                    </div>
-                    <div class="node-metrics">
-                        <div class="node-metric">
-                            <span class="metric-label">RSSI</span>
-                            <span class="metric-value node-rssi">-- dBm</span>
-                        </div>
-                        <div class="node-metric">
-                            <span class="metric-label">Amp</span>
-                            <span class="metric-value node-amp">--</span>
-                        </div>
-                        <div class="node-metric">
-                            <span class="metric-label">SC</span>
-                            <span class="metric-value node-sc">--</span>
-                        </div>
-                    </div>
-                    <div class="node-seq">seq: <span class="node-seq-val">--</span></div>
-                </div>
-
-                <div class="node-card" data-node="1">
-                    <div class="node-status-dot offline"></div>
-                    <div class="node-info">
-                        <div class="node-name">Node 1</div>
-                        <div class="node-position">Front-Right</div>
-                    </div>
-                    <div class="node-metrics">
-                        <div class="node-metric">
-                            <span class="metric-label">RSSI</span>
-                            <span class="metric-value node-rssi">-- dBm</span>
-                        </div>
-                        <div class="node-metric">
-                            <span class="metric-label">Amp</span>
-                            <span class="metric-value node-amp">--</span>
-                        </div>
-                        <div class="node-metric">
-                            <span class="metric-label">SC</span>
-                            <span class="metric-value node-sc">--</span>
-                        </div>
-                    </div>
-                    <div class="node-seq">seq: <span class="node-seq-val">--</span></div>
-                </div>
-
-                <div class="node-card" data-node="2">
-                    <div class="node-status-dot offline"></div>
-                    <div class="node-info">
-                        <div class="node-name">Node 2</div>
-                        <div class="node-position">Back-Left</div>
-                    </div>
-                    <div class="node-metrics">
-                        <div class="node-metric">
-                            <span class="metric-label">RSSI</span>
-                            <span class="metric-value node-rssi">-- dBm</span>
-                        </div>
-                        <div class="node-metric">
-                            <span class="metric-label">Amp</span>
-                            <span class="metric-value node-amp">--</span>
-                        </div>
-                        <div class="node-metric">
-                            <span class="metric-label">SC</span>
-                            <span class="metric-value node-sc">--</span>
-                        </div>
-                    </div>
-                    <div class="node-seq">seq: <span class="node-seq-val">--</span></div>
-                </div>
-
-                <div class="node-card" data-node="3">
-                    <div class="node-status-dot offline"></div>
-                    <div class="node-info">
-                        <div class="node-name">Node 3</div>
-                        <div class="node-position">Back-Right</div>
-                    </div>
-                    <div class="node-metrics">
-                        <div class="node-metric">
-                            <span class="metric-label">RSSI</span>
-                            <span class="metric-value node-rssi">-- dBm</span>
-                        </div>
-                        <div class="node-metric">
-                            <span class="metric-label">Amp</span>
-                            <span class="metric-value node-amp">--</span>
-                        </div>
-                        <div class="node-metric">
-                            <span class="metric-label">SC</span>
-                            <span class="metric-value node-sc">--</span>
-                        </div>
-                    </div>
-                    <div class="node-seq">seq: <span class="node-seq-val">--</span></div>
-                </div>
-
-                <div class="node-card" data-node="4">
-                    <div class="node-status-dot offline"></div>
-                    <div class="node-info">
-                        <div class="node-name">Node 4</div>
-                        <div class="node-position">Front-Center</div>
-                    </div>
-                    <div class="node-metrics">
-                        <div class="node-metric">
-                            <span class="metric-label">RSSI</span>
-                            <span class="metric-value node-rssi">-- dBm</span>
-                        </div>
-                        <div class="node-metric">
-                            <span class="metric-label">Amp</span>
-                            <span class="metric-value node-amp">--</span>
-                        </div>
-                        <div class="node-metric">
-                            <span class="metric-label">SC</span>
-                            <span class="metric-value node-sc">--</span>
-                        </div>
-                    </div>
-                    <div class="node-seq">seq: <span class="node-seq-val">--</span></div>
-                </div>
-
-                <div class="node-card" data-node="5">
-                    <div class="node-status-dot offline"></div>
-                    <div class="node-info">
-                        <div class="node-name">Node 5</div>
-                        <div class="node-position">Back-Center</div>
-                    </div>
-                    <div class="node-metrics">
-                        <div class="node-metric">
-                            <span class="metric-label">RSSI</span>
-                            <span class="metric-value node-rssi">-- dBm</span>
-                        </div>
-                        <div class="node-metric">
-                            <span class="metric-label">Amp</span>
-                            <span class="metric-value node-amp">--</span>
-                        </div>
-                        <div class="node-metric">
-                            <span class="metric-label">SC</span>
-                            <span class="metric-value node-sc">--</span>
-                        </div>
-                    </div>
-                    <div class="node-seq">seq: <span class="node-seq-val">--</span></div>
-                </div>
-            </div>
-
-            <!-- System Overview -->
-            <div class="overview-grid">
-                <div class="overview-card">
-                    <div class="overview-icon">📊</div>
-                    <div class="overview-content">
-                        <div class="overview-label">감지 상태</div>
-                        <div class="overview-value" id="detection-status">대기중</div>
+        <!-- Main Grid -->
+        <main class="grid">
+            <!-- Pose Canvas -->
+            <section class="card card-pose">
+                <div class="card-top">
+                    <h2>Pose Estimation</h2>
+                    <div class="badges">
+                        <span class="badge" id="badge-source">--</span>
+                        <span class="badge badge-accent" id="badge-conf">-- %</span>
+                        <span class="badge" id="badge-persons">0명</span>
                     </div>
                 </div>
-                <div class="overview-card">
-                    <div class="overview-icon">🏃</div>
-                    <div class="overview-content">
-                        <div class="overview-label">모션 레벨</div>
-                        <div class="overview-value" id="motion-level">--</div>
-                    </div>
+                <div class="canvas-wrap">
+                    <canvas id="pose-canvas"></canvas>
                 </div>
-                <div class="overview-card">
-                    <div class="overview-icon">🎯</div>
-                    <div class="overview-content">
-                        <div class="overview-label">신뢰도</div>
-                        <div class="overview-value" id="confidence-value">--%</div>
-                    </div>
-                </div>
-                <div class="overview-card">
-                    <div class="overview-icon">📶</div>
-                    <div class="overview-content">
-                        <div class="overview-label">평균 RSSI</div>
-                        <div class="overview-value" id="avg-rssi">-- dBm</div>
-                    </div>
-                </div>
-            </div>
+            </section>
 
-            <!-- Live Status Panel (hidden, for DashboardTab component) -->
-            <div class="live-status-panel" style="display:none">
-                <h3>System Status</h3>
-                <div class="status-grid">
-                    <div class="component-status" data-component="api">
-                        <span class="component-name">API Server</span>
-                        <span class="status-text">-</span>
-                        <span class="status-message"></span>
+            <!-- Vital Signs -->
+            <section class="card card-vitals">
+                <h2>Vital Signs</h2>
+                <div class="vitals-row">
+                    <div class="vital-item">
+                        <div class="vital-ring" id="hr-ring">
+                            <svg viewBox="0 0 80 80">
+                                <circle cx="40" cy="40" r="34" class="ring-bg"/>
+                                <circle cx="40" cy="40" r="34" class="ring-fill" id="hr-arc"/>
+                            </svg>
+                            <div class="vital-num" id="hr-val">--</div>
+                        </div>
+                        <span class="vital-label">Heart Rate <small>bpm</small></span>
                     </div>
-                    <div class="component-status" data-component="hardware">
-                        <span class="component-name">Hardware</span>
-                        <span class="status-text">-</span>
-                        <span class="status-message"></span>
-                    </div>
-                    <div class="component-status" data-component="inference">
-                        <span class="component-name">Inference</span>
-                        <span class="status-text">-</span>
-                        <span class="status-message"></span>
-                    </div>
-                    <div class="component-status" data-component="streaming">
-                        <span class="component-name">Streaming</span>
-                        <span class="status-text">-</span>
-                        <span class="status-message"></span>
-                    </div>
-                    <div class="component-status" data-component="datasource" id="dashboard-datasource">
-                        <span class="component-name">Data Source</span>
-                        <span class="status-text">-</span>
-                        <span class="status-message"></span>
+                    <div class="vital-item">
+                        <div class="vital-ring">
+                            <svg viewBox="0 0 80 80">
+                                <circle cx="40" cy="40" r="34" class="ring-bg"/>
+                                <circle cx="40" cy="40" r="34" class="ring-fill ring-br" id="br-arc"/>
+                            </svg>
+                            <div class="vital-num" id="br-val">--</div>
+                        </div>
+                        <span class="vital-label">Breathing <small>rpm</small></span>
                     </div>
                 </div>
-            </div>
-        </section>
+                <div class="vital-conf">
+                    <div class="conf-bar">
+                        <div class="conf-fill" id="hr-conf-bar"></div>
+                    </div>
+                    <span class="conf-text" id="hr-conf-text">HR 신뢰도 --%</span>
+                </div>
+                <div class="vital-conf">
+                    <div class="conf-bar">
+                        <div class="conf-fill conf-fill-br" id="br-conf-bar"></div>
+                    </div>
+                    <span class="conf-text" id="br-conf-text">BR 신뢰도 --%</span>
+                </div>
+            </section>
 
-        <!-- Training Tab -->
-        <section id="training" class="tab-content">
-            <div class="section-header">
-                <h2>모델 학습</h2>
-                <span class="section-desc">CSI 데이터 수집 및 포즈 추정 모델 학습</span>
-            </div>
-            <div id="training-container" style="display: flex; gap: 20px; flex-wrap: wrap;">
-                <div id="training-panel-container" style="flex: 1; min-width: 400px;"></div>
-                <div id="model-panel-container" style="flex: 1; min-width: 350px; max-width: 450px;"></div>
-            </div>
-        </section>
+            <!-- Nodes -->
+            <section class="card card-nodes">
+                <div class="card-top">
+                    <h2>ESP32 Nodes</h2>
+                    <span class="badge" id="badge-nodes">0 online</span>
+                </div>
+                <div class="node-list" id="node-list">
+                    <div class="empty-msg">노드 대기 중...</div>
+                </div>
+            </section>
+
+            <!-- Detection -->
+            <section class="card card-detect">
+                <h2>Detection</h2>
+                <div class="detect-grid">
+                    <div class="detect-item">
+                        <span class="detect-label">Motion</span>
+                        <span class="detect-val" id="det-motion">--</span>
+                    </div>
+                    <div class="detect-item">
+                        <span class="detect-label">Presence</span>
+                        <span class="detect-val" id="det-presence">--</span>
+                    </div>
+                    <div class="detect-item">
+                        <span class="detect-label">Persons</span>
+                        <span class="detect-val" id="det-persons">0</span>
+                    </div>
+                    <div class="detect-item">
+                        <span class="detect-label">Posture</span>
+                        <span class="detect-val" id="det-posture">--</span>
+                    </div>
+                    <div class="detect-item">
+                        <span class="detect-label">Signal Quality</span>
+                        <div class="quality-bar">
+                            <div class="quality-fill" id="sig-quality-bar"></div>
+                        </div>
+                    </div>
+                    <div class="detect-item">
+                        <span class="detect-label">Confidence</span>
+                        <div class="quality-bar">
+                            <div class="quality-fill quality-fill-purple" id="det-conf-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Signal Features -->
+            <section class="card card-signal">
+                <h2>Signal Features</h2>
+                <div class="signal-grid">
+                    <div class="sig-item">
+                        <span class="sig-label">Mean RSSI</span>
+                        <span class="sig-val mono" id="sig-rssi">-- dBm</span>
+                    </div>
+                    <div class="sig-item">
+                        <span class="sig-label">Variance</span>
+                        <span class="sig-val mono" id="sig-var">--</span>
+                    </div>
+                    <div class="sig-item">
+                        <span class="sig-label">Motion Band</span>
+                        <span class="sig-val mono" id="sig-motion">--</span>
+                    </div>
+                    <div class="sig-item">
+                        <span class="sig-label">Breathing Band</span>
+                        <span class="sig-val mono" id="sig-breath">--</span>
+                    </div>
+                    <div class="sig-item">
+                        <span class="sig-label">Dominant Freq</span>
+                        <span class="sig-val mono" id="sig-freq">-- Hz</span>
+                    </div>
+                    <div class="sig-item">
+                        <span class="sig-label">Spectral Power</span>
+                        <span class="sig-val mono" id="sig-power">--</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Toast -->
+        <div id="toast-area"></div>
     </div>
 
-    <!-- Error Toast -->
-    <div id="globalErrorToast" class="error-toast"></div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <span>RuView — WiFi DensePose</span>
-        <span class="footer-divider">·</span>
-        <span>by <strong>bin9208</strong></span>
-        <span class="footer-divider">·</span>
-        <span>ESP32-S3 × 6</span>
-    </footer>
-
-    <!-- Load application scripts as modules -->
-    <script type="module" src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

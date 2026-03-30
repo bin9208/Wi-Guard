@@ -78,8 +78,8 @@ struct Args {
     #[arg(long, default_value = "100")]
     tick_ms: u64,
 
-    /// Bind address (default 127.0.0.1; set to 0.0.0.0 for network access)
-    #[arg(long, default_value = "127.0.0.1", env = "SENSING_BIND_ADDR")]
+    /// Bind address (default 0.0.0.0 for network access)
+    #[arg(long, default_value = "0.0.0.0", env = "SENSING_BIND_ADDR")]
     bind_addr: String,
 
     /// Data source: auto, wifi, esp32, simulate
@@ -146,7 +146,7 @@ struct Args {
     #[arg(long, value_name = "TYPE")]
     build_index: Option<String>,
 
-    /// Path to trained PyTorch checkpoint (.pt) for real-time GPU inference
+    /// Path to trained model checkpoint (.safetensors or .pt) for real-time GPU inference
     #[arg(long, value_name = "PATH")]
     model_checkpoint: Option<PathBuf>,
 
@@ -168,7 +168,7 @@ struct Esp32Frame {
     magic: u32,
     node_id: u8,
     n_antennas: u8,
-    n_subcarriers: u8,
+    n_subcarriers: u16,  // u16: supports up to 192sc (3 unmerged LTF symbols)
     freq_mhz: u16,
     sequence: u32,
     rssi: i8,
@@ -494,6 +494,33 @@ fn parse_wasm_output(buf: &[u8]) -> Option<WasmOutputPacket> {
     })
 }
 
+// ── Subcarrier normalization ─────────────────────────────────────────────────
+
+/// Select exactly 56 subcarriers from a raw CSI vector.
+///
+/// - 64sc (HT20 LTF-merged, standard):       take first 56 — matches training.
+/// - 192sc (3 unmerged LTF symbols on some nodes): stride-3 downsample → 64, take 56.
+/// - <56sc: zero-pad to 56.
+///
+/// The stride-3 approach for 192sc evenly samples all three LTF symbols so the
+/// resulting 56 values represent the full frequency range rather than only the
+/// lowest frequencies.
+fn select_56_subcarriers(amps: &[f64], phases: &[f64], n_sc: usize) -> (Vec<f64>, Vec<f64>) {
+    const OUT: usize = 56;
+    if n_sc <= OUT {
+        let mut a = amps[..n_sc.min(amps.len())].to_vec();
+        a.resize(OUT, 0.0);
+        let mut p = phases[..n_sc.min(phases.len())].to_vec();
+        p.resize(OUT, 0.0);
+        return (a, p);
+    }
+    // 192sc = 3 LTF symbols of 64 each → stride 3 to evenly sample all symbols
+    let step = if n_sc >= 128 { 3 } else { 1 };
+    let a: Vec<f64> = amps.iter().step_by(step).take(OUT).copied().collect();
+    let p: Vec<f64> = phases.iter().step_by(step).take(OUT).copied().collect();
+    (a, p)
+}
+
 // ── ESP32 UDP frame parser ───────────────────────────────────────────────────
 
 fn parse_esp32_frame(buf: &[u8]) -> Option<Esp32Frame> {
@@ -508,11 +535,17 @@ fn parse_esp32_frame(buf: &[u8]) -> Option<Esp32Frame> {
 
     let node_id = buf[4];
     let n_antennas = buf[5];
-    let n_subcarriers = buf[6];
-    let freq_mhz = u16::from_le_bytes([buf[8], buf[9]]);
-    let sequence = u32::from_le_bytes([buf[10], buf[11], buf[12], buf[13]]);
-    let rssi = buf[14] as i8;
-    let noise_floor = buf[15] as i8;
+    // ADR-018 layout — offsets corrected to match firmware csi_serialize_frame:
+    //   [6..8]  n_subcarriers (LE u16)
+    //   [8..12] freq_mhz     (LE u32)
+    //   [12..16] sequence    (LE u32)
+    //   [16]   rssi          (i8)
+    //   [17]   noise_floor   (i8)
+    let n_subcarriers = u16::from_le_bytes([buf[6], buf[7]]);
+    let freq_mhz = u32::from_le_bytes([buf[8], buf[9], buf[10], buf[11]]) as u16;
+    let sequence = u32::from_le_bytes([buf[12], buf[13], buf[14], buf[15]]);
+    let rssi = buf[16] as i8;
+    let noise_floor = buf[17] as i8;
 
     let iq_start = 20;
     let n_pairs = n_antennas as usize * n_subcarriers as usize;
@@ -1201,7 +1234,7 @@ async fn windows_wifi_task(state: SharedState, tick_ms: u64) {
             magic: 0xC511_0001,
             node_id: 0,
             n_antennas: 1,
-            n_subcarriers: obs_count.min(255) as u8,
+            n_subcarriers: obs_count as u16,
             freq_mhz: 2437,
             sequence: seq,
             rssi: first_rssi.clamp(-128.0, 127.0) as i8,
@@ -1218,8 +1251,10 @@ async fn windows_wifi_task(state: SharedState, tick_ms: u64) {
         }
 
         // Feed frame to GPU inference pipeline.
+        let (norm_amp, norm_phase) = select_56_subcarriers(
+            &frame.amplitudes, &frame.phases, frame.n_subcarriers as usize);
         let slim = inference_bridge::CsiFrameSlim::from_esp32(
-            &frame.amplitudes, &frame.phases
+            frame.node_id, &norm_amp, &norm_phase
         );
         send_frame_to_inference(&s_write_pre, &slim);
 
@@ -1507,7 +1542,7 @@ fn generate_simulated_frame(tick: u64) -> Esp32Frame {
         magic: 0xC511_0001,
         node_id: 1,
         n_antennas: 1,
-        n_subcarriers: n_sub as u8,
+        n_subcarriers: n_sub as u16,
         freq_mhz: 2437,
         sequence: tick as u32,
         rssi: (-40.0 + 5.0 * (t * 0.2).sin()) as i8,
@@ -2639,8 +2674,12 @@ async fn udp_receiver_task(state: SharedState, udp_port: u16) {
                     }
 
                     // Feed frame to GPU inference pipeline.
+                    // Normalize to exactly 56 subcarriers regardless of what arrived
+                    // (64sc standard, 192sc when ltf_merge_en fails on some nodes).
+                    let (norm_amp, norm_phase) = select_56_subcarriers(
+                        &frame.amplitudes, &frame.phases, frame.n_subcarriers as usize);
                     let slim = inference_bridge::CsiFrameSlim::from_esp32(
-                        &frame.amplitudes, &frame.phases
+                        frame.node_id, &norm_amp, &norm_phase
                     );
                     send_frame_to_inference(&s, &slim);
 
@@ -2762,8 +2801,10 @@ async fn simulated_data_task(state: SharedState, tick_ms: u64) {
         }
 
         // Feed frame to GPU inference pipeline.
+        let (norm_amp, norm_phase) = select_56_subcarriers(
+            &frame.amplitudes, &frame.phases, frame.n_subcarriers as usize);
         let slim = inference_bridge::CsiFrameSlim::from_esp32(
-            &frame.amplitudes, &frame.phases
+            frame.node_id, &norm_amp, &norm_phase
         );
         send_frame_to_inference(&s, &slim);
 
@@ -3426,8 +3467,11 @@ async fn main() {
             zscore_path,
             inference_stride: args.inference_stride,
             confidence_threshold: 0.15,
-            canvas_width: 640.0,
-            canvas_height: 480.0,
+            // Normalized [0.0, 1.0] coordinates — the UI (app.js) applies
+            // its own canvas scaling via `pad + x * pw`, so we must NOT
+            // pre-multiply by pixel dimensions here.
+            canvas_width: 1.0,
+            canvas_height: 1.0,
         };
         match inference_bridge::spawn_inference_pipeline(config) {
             Ok((tx, rx)) => {
@@ -3614,7 +3658,7 @@ async fn main() {
     let http_listener = tokio::net::TcpListener::bind(http_addr).await
         .expect("Failed to bind HTTP port");
     info!("HTTP server listening on {http_addr}");
-    info!("Open http://localhost:{}/ui/index.html in your browser", args.http_port);
+    info!("Open http://<NAS_IP>:{}/ui/index.html in your browser", args.http_port);
 
     // Run the HTTP server with graceful shutdown support
     let shutdown_state = state.clone();

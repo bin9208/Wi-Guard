@@ -1,0 +1,10 @@
+venv/
+target/
+.git/
+.dockerignore
+Dockerfile
+docker-compose.yml
+**/*.pyc
+__pycache__/
+.claude-flow/
+build_log.txt

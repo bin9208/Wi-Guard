@@ -90,7 +90,8 @@ size_t csi_serialize_frame(const wifi_csi_info_t *info, uint8_t *buf, size_t buf
         return 0;
     }
 
-    uint8_t n_antennas = 1;  /* ESP32-S3 typically reports 1 antenna for CSI */
+    /* ADR-064: Force 1 antenna to match single-antenna node hardware. */
+    const uint8_t n_antennas = 1;
     uint16_t iq_len = (uint16_t)info->len;
     uint16_t n_subcarriers = iq_len / (2 * n_antennas);
 
@@ -251,11 +252,25 @@ void csi_collector_init(void)
 
     ESP_LOGI(TAG, "Promiscuous mode enabled for CSI capture");
 
+    /* ADR-064: Force consistent 64sc output on all nodes.
+     *
+     * stbc_htltf2_en=true caused Node 3 (and occasionally others) to emit
+     * 192 subcarriers (3 unmerged LTF symbols × 64) instead of the expected
+     * 64 (LLTF + HTLTF merged).  The STBC second HT-LTF is only present in
+     * STBC frames, which most APs do not send to single-antenna STAs.  When
+     * the AP does send an STBC frame and ltf_merge_en=true doesn't collapse
+     * the three symbols, info->len jumps from 128 to 384 bytes.
+     *
+     * Fix: disable STBC HT-LTF2.  The resulting frames are always
+     * LLTF(128B) + HTLTF(128B), merged to 128B = 64sc by ltf_merge_en.
+     * All nodes now produce a consistent 64-subcarrier vector; the server
+     * selects the first 56 to match the model's N_SUB=56 requirement.
+     */
     wifi_csi_config_t csi_config = {
         .lltf_en = true,
         .htltf_en = true,
-        .stbc_htltf2_en = true,
-        .ltf_merge_en = true,
+        .stbc_htltf2_en = false,   /* ← was true: caused 192sc on some nodes */
+        .ltf_merge_en = true,      /* merge LLTF+HTLTF → single 64sc output  */
         .channel_filter_en = false,
         .manu_scale = false,
         .shift = false,

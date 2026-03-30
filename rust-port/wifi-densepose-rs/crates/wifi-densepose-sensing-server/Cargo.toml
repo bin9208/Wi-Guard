@@ -46,5 +46,11 @@ wifi-densepose-wifiscan = { version = "0.3.0", path = "../wifi-densepose-wifisca
 # GPU inference via PyTorch (tch-rs)
 tch = { workspace = true }
 
+# Safetensors model loading (WiFiDensePoseModel architecture)
+wifi-densepose-train = { version = "0.3.0", path = "../wifi-densepose-train", default-features = false, features = ["torch-backend"] }
+
+# Random noise for antenna replication diversity
+rand = "0.9"
+
 [dev-dependencies]
 tempfile = "3.10"

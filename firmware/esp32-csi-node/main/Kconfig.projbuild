@@ -68,15 +68,15 @@ menu "Edge Intelligence (ADR-039)"
 
     config EDGE_FALL_THRESH
         int "Fall detection threshold (x1000)"
-        default 15000
-        range 100 50000
+        default 80000
+        range 100 200000
         help
             Phase acceleration threshold for fall detection.
-            Value is divided by 1000 to get rad/s². Default 15000 = 15.0 rad/s².
-            Raise to reduce false positives in high-traffic environments.
-            Normal walking produces accelerations of 2-5 rad/s².
-            Stored as integer; divided by 1000 at runtime.
-            Default 2000 = 2.0 rad/s^2.
+            Value is divided by 1000 to get rad/s².
+            Default 80000 = 80.0 rad/s².
+            Normal walking: 10-30 rad/s², vigorous movement: 30-60 rad/s².
+            Real falls typically exceed 100+ rad/s².
+            Raise to reduce false positives. Lower for higher sensitivity.
 
     config EDGE_POWER_DUTY
         int "Power duty cycle percentage"
@@ -92,11 +92,12 @@ menu "AMOLED Display (ADR-045)"
 
     config DISPLAY_ENABLE
         bool "Enable AMOLED display support"
-        default y
+        default n
         help
             Enable RM67162 QSPI AMOLED display and LVGL UI.
             Auto-detects at boot; gracefully skips if no display hardware.
             Requires SPIRAM for frame buffers.
+            Disabled by default — enable only when an AMOLED display is attached.
 
     config DISPLAY_FPS_LIMIT
         int "Display refresh rate limit (FPS)"
@@ -173,11 +174,12 @@ menu "WASM Programmable Sensing (ADR-040)"
 
     config WASM_ENABLE
         bool "Enable WASM Tier 3 runtime"
-        default y
+        default n
         help
             Enable the WASM3 interpreter for hot-loadable sensing modules.
             Requires WASM3 source in components/wasm3/wasm3-src/.
             Adds ~120 KB flash and ~20 KB SRAM.
+            Disabled by default — enable only when WASM modules are deployed.
 
     config WASM_MAX_MODULES
         int "Maximum concurrent WASM modules"
@@ -202,6 +204,32 @@ menu "WASM Programmable Sensing (ADR-040)"
         help
             How often to call on_timer() on running WASM modules.
             Default 1000 ms = 1 Hz.
+
+endmenu
+
+menu "mmWave Sensor (ADR-063)"
+
+    config MMWAVE_ENABLE
+        bool "Enable mmWave sensor support (HLK-LD2410 / MR60BHA2)"
+        default n
+        help
+            Enable 60 GHz (Seeed MR60BHA2) or 24 GHz (HLK-LD2410) mmWave sensor
+            for fused vitals (heart rate + breathing rate + presence).
+            Disabled by default — enable when mmWave hardware is physically attached.
+            Connects via UART on default GPIO pins (configurable in nvs_config).
+
+endmenu
+
+menu "Swarm Bridge (ADR-066)"
+
+    config SWARM_ENABLE
+        bool "Enable Cognitum Seed swarm bridge"
+        default n
+        help
+            Enable WebSocket bridge to Cognitum Seed swarm coordinator.
+            Allows this node to participate in distributed sensing swarms.
+            Requires seed_url and seed_token to be provisioned via NVS.
+            Disabled by default — enable when a Cognitum Seed server is available.
 
 endmenu
 

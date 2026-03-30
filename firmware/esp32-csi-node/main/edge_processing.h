@@ -30,7 +30,10 @@
 
 /* ---- Buffer sizes ---- */
 #define EDGE_RING_SLOTS       16    /**< SPSC ring buffer slots (power of 2). */
-#define EDGE_MAX_IQ_BYTES     1024  /**< Max I/Q payload per slot. */
+#define EDGE_MAX_IQ_BYTES     256   /**< Max I/Q payload per slot.
+                                     *   64 subcarriers × 2 bytes (I+Q) = 128 bytes;
+                                     *   256 provides headroom for 192sc edge cases.
+                                     *   Saves 12 KB SRAM vs the previous 1024. */
 #define EDGE_PHASE_HISTORY_LEN 256  /**< Phase history buffer depth. */
 #define EDGE_TOP_K            8     /**< Top-K subcarriers to track. */
 #define EDGE_MAX_SUBCARRIERS  128   /**< Max subcarriers per frame. */

@@ -19,7 +19,9 @@
 
 #include "edge_processing.h"
 #include "nvs_config.h"
+#ifdef CONFIG_MMWAVE_ENABLE
 #include "mmwave_sensor.h"
+#endif
 
 /* Runtime config — declared in main.c, loaded from NVS at boot. */
 extern nvs_config_t g_nvs_config;
@@ -30,6 +32,7 @@ extern nvs_config_t g_nvs_config;
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_attr.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "sdkconfig.h"
@@ -40,13 +43,20 @@ static const char *TAG = "edge_proc";
  * SPSC Ring Buffer (lock-free, single-producer single-consumer)
  * ====================================================================== */
 
+/* Place ring buffer in PSRAM when available (frees ~4 KB internal SRAM). */
+#ifdef CONFIG_SPIRAM
+static EXT_RAM_BSS_ATTR edge_ring_buf_t s_ring;
+#else
 static edge_ring_buf_t s_ring;
+#endif
+static uint32_t s_ring_drops;  /* Frames dropped due to full ring buffer. */
 
 static inline bool ring_push(const uint8_t *iq, uint16_t len,
                              int8_t rssi, uint8_t channel)
 {
     uint32_t next = (s_ring.head + 1) % EDGE_RING_SLOTS;
     if (next == s_ring.tail) {
+        s_ring_drops++;
         return false;  /* Full — drop frame. */
     }
 
@@ -574,7 +584,9 @@ static void send_vitals_packet(void)
     s_latest_pkt = pkt;
     s_pkt_valid = true;
 
-    /* ADR-063: If mmWave is active, send fused 48-byte packet instead. */
+    /* ADR-063: If mmWave hardware is enabled and active, send fused 48-byte
+     * packet; otherwise send the standard 32-byte CSI vitals packet. */
+#ifdef CONFIG_MMWAVE_ENABLE
     mmwave_state_t mw;
     if (mmwave_sensor_get_state(&mw) && mw.detected) {
         edge_fused_vitals_pkt_t fpkt;
@@ -623,9 +635,13 @@ static void send_vitals_packet(void)
 
         stream_sender_send((const uint8_t *)&fpkt, sizeof(fpkt));
     } else {
-        /* No mmWave — send standard 32-byte packet. */
+        /* mmWave enabled but not detected — send CSI-only packet. */
         stream_sender_send((const uint8_t *)&pkt, sizeof(pkt));
     }
+#else
+    /* mmWave disabled — send standard 32-byte CSI vitals packet. */
+    stream_sender_send((const uint8_t *)&pkt, sizeof(pkt));
+#endif
 }
 
 /* ======================================================================
@@ -788,12 +804,13 @@ static void process_frame(const edge_ring_slot_t *slot)
 
         if ((s_frame_count % 200) == 0) {
             ESP_LOGI(TAG, "Vitals: br=%.1f hr=%.1f motion=%.4f pres=%s "
-                     "fall=%s persons=%u frames=%lu",
+                     "fall=%s persons=%u frames=%lu drops=%lu",
                      s_breathing_bpm, s_heartrate_bpm, s_motion_energy,
                      s_presence_detected ? "YES" : "no",
                      s_fall_detected ? "YES" : "no",
                      (unsigned)s_latest_pkt.n_persons,
-                     (unsigned long)s_frame_count);
+                     (unsigned long)s_frame_count,
+                     (unsigned long)s_ring_drops);
         }
     }
 
@@ -823,27 +840,48 @@ static void process_frame(const edge_ring_slot_t *slot)
  * Edge Processing Task (pinned to Core 1)
  * ====================================================================== */
 
+/* Target DSP processing rate = 20 Hz (matches IIR filter design fs=20 Hz).
+ * The WiFi CSI callback can fire at 100-500 Hz on busy networks.  Without
+ * rate-limiting, process_frame() would run at the CSI callback rate and the
+ * IIR passband cutoffs would be off by a proportional factor.
+ * Solution: drain at most one frame per 50 ms window (= 20 Hz).  Extra frames
+ * accumulate in the 16-slot SPSC ring and are naturally dropped when full,
+ * which is acceptable because we only need ~20 samples/s for vital-signs DSP. */
+#define DSP_TARGET_INTERVAL_US  50000ULL  /**< 1/20 Hz = 50 ms in microseconds. */
+
 static void edge_task(void *arg)
 {
     (void)arg;
-    ESP_LOGI(TAG, "Edge DSP task started on core %d (tier=%u)",
+    ESP_LOGI(TAG, "Edge DSP task started on core %d (tier=%u, rate=20 Hz)",
              xPortGetCoreID(), s_cfg.tier);
 
     edge_ring_slot_t slot;
+    int64_t last_proc_us = 0;
 
     while (1) {
+        int64_t now = esp_timer_get_time();
+
+        /* Rate-limit to 20 Hz: skip processing until 50ms has elapsed. */
+        if ((uint64_t)(now - last_proc_us) < DSP_TARGET_INTERVAL_US) {
+            vTaskDelay(pdMS_TO_TICKS(5));
+            continue;
+        }
+
         if (ring_pop(&slot)) {
             process_frame(&slot);
-            /* Yield after every frame to feed the Core 1 watchdog.
-             * process_frame() is CPU-intensive (biquad filters, Welford stats,
-             * BPM estimation, multi-person vitals) and can take several ms.
-             * Without this yield, edge_dsp at priority 5 starves IDLE1 at
-             * priority 0, triggering the task watchdog. See issue #266. */
-            vTaskDelay(1);
+            last_proc_us = esp_timer_get_time();
+            /* Drain any extra accumulated frames from the ring without
+             * processing them — keeps the ring from overflowing on high
+             * CSI rates while maintaining exactly 20 Hz DSP output. */
+            edge_ring_slot_t discard;
+            while (ring_pop(&discard)) { /* drop */ }
         } else {
-            /* No frames available — yield briefly. */
-            vTaskDelay(pdMS_TO_TICKS(1));
+            /* No frames available — sleep until next expected frame. */
+            vTaskDelay(pdMS_TO_TICKS(10));
         }
+
+        /* Always yield briefly so IDLE1 can feed the Core 1 watchdog. */
+        vTaskDelay(1);
     }
 }
 
